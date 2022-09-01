@@ -6,8 +6,7 @@ require("@nomiclabs/hardhat-waffle");
 require("dotenv").config();
 const web3 = require('web3');
 
-//const dotenv = require('dotenv').config()
-//npx hardhat run scripts/deploy.js --network rinkeby
+// npx hardhat run scripts/deploy.js --network rinkeby
 
 // tellor flex arguments
 var tokenAddress = '0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0';
