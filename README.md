@@ -13,7 +13,7 @@ Compile Smart Contracts
 npx hardhat compile
 ```
 
-Deploy contract
+Deploy contracts
 ```
 npx hardhat run scripts/deploy.js --network rinkeby
 ```

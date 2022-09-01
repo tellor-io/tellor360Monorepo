@@ -19,7 +19,7 @@
     "hardhat-gas-reporter": "^1.0.8"
   },
   "dependencies": {
-    "autopay": "github:tellor-io/autoPay#360audit",
+    "autopay": "github:tellor-io/autoPay#360",
     "dotenv": "^16.0.2",
     "polygongovernance": "github:tellor-io/governance#360",
     "solidity-coverage": "^0.7.21",
