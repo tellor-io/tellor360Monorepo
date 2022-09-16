@@ -5,7 +5,7 @@ const web3 = require('web3');
 const { ethers } = require("hardhat");
 const { keccak256 } = require("ethers/lib/utils");
 
-describe("Function Tests - BaseToken", function() {
+describe("Forking Tests - Before Transition", function() {
 
   // rinkeby
   const tellorMaster = "0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0"
@@ -15,11 +15,11 @@ describe("Function Tests - BaseToken", function() {
   const REPORTER = "0x0D4F81320d36d7B7Cf5fE7d1D547f63EcBD1a3E0"
   const TELLORX_ORACLE = "0x18431fd88adF138e8b979A7246eb58EA7126ea16"
   // tellor360
-  const ORACLE360 = "0x745fA45150e97Af36D665b69a7e79d27C860d276"
-  const GOVERNANCE360 = "0x84BE96a2fc0FAe87Dd097A9C3353529981c88d91"
-  const AUTOPAY360 = "0xc450bEBF13281cAC512dfc3DC4c01c241d3a6EBf"
-  const TELLOR360 = "0x9c1cF6Ef70D42CC2449DE3E29C664F235D6D4470"
-  const QUERY_DATA_STORAGE = "0x9F2D4C53ebE3fF84F1C456E3E96622cEb4584265"
+  const ORACLE360 = "0x09316E89e0D1BF40D21edc8Aba38980F3e711Ef6"
+  const GOVERNANCE360 = "0x5bbE24d18F13047f4299dacA7e1435c4fec56384"
+  const AUTOPAY360 = "0x97149c8CdE2a7baA71384BAA02c4814A35F9604e"
+  const TELLOR360 = "0xF667Ed2BA355298649c7eb23ae7385cdc181B648"
+  const QUERY_DATA_STORAGE = "0x638b138B5470DB078f6Ee0fC45935a38D2eEc1Cc"
 
   const abiCoder = new ethers.utils.AbiCoder();
   const AUTOPAY_QUERY_DATA_ARGS = abiCoder.encode(["bytes"], ["0x"])
@@ -47,6 +47,7 @@ describe("Function Tests - BaseToken", function() {
       method: "hardhat_reset",
       params: [{forking: {
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
+            blockNumber: 11384844
           },},],
       });
 
@@ -184,7 +185,7 @@ describe("Function Tests - BaseToken", function() {
     assert(await tellor.balanceOf(accounts[1].address) == expectedBalance, "balance not updated correctly")
   })
 
-  it("vote with autopay user address", async function() {
+  it("vote with all stakeholder addresses", async function() {
     await tellor.connect(bigWallet).transfer(accounts[1].address, h.toWei("1000"))
     await tellor.connect(bigWallet).transfer(accounts[2].address, h.toWei("1000"))
     await tellor.connect(bigWallet).transfer(accounts[3].address, h.toWei("1000"))
@@ -219,12 +220,14 @@ describe("Function Tests - BaseToken", function() {
     await h.advanceTime(86400)
     await governance.executeVote(1)
 
-    devWalletBal = await tellor.balanceOf(devWallet.address)
-    // expectedTokenholders = BigInt(await tellor.balanceOf(devWallet.address)) + BigInt(h.toWei("1000"))
+    devWalletBal = await tellor.balanceOf(DEV_WALLET)
+    expectedTokenholders = BigInt(devWalletBal) + BigInt(h.toWei("1000"))
 
-    // voteInfo = await governance.getVoteInfo(1)
-    // assert(voteInfo[1][8] == h.toWei("1000"), "users doesSupport vote weight not updated correctly")
-    // assert(voteInfo[1][5] == expectedTokenholders, "tokenholders doesSupport vote weight not updated correctly")
+    voteInfo = await governance.getVoteInfo(1)
+    assert(voteInfo[1][8] == h.toWei("1000"), "users doesSupport vote weight not updated correctly")
+    assert(voteInfo[1][5] == expectedTokenholders, "tokenholders doesSupport vote weight not updated correctly")
+    assert(voteInfo[1][14] == 1, "multisig doesSupport vote weight not updated correctly")
+    assert(voteInfo[1][11] == 1, "reporters doesSupport vote weight not updated correctly")
   })
 
   it("report trb/usd and update stake amount", async function() {
@@ -236,14 +239,102 @@ describe("Function Tests - BaseToken", function() {
 
     // report trb/usd price
     await oracle.connect(accounts[1]).submitValue(TRB_QUERY_ID, h.uintTob32(h.toWei("2500")), 0, TRB_QUERY_DATA)
-    await h.advanceTime(86400/2)
+    await h.advanceTime(86400/2) 
 
     // update stake amount
     await oracle.connect(accounts[1]).updateStakeAmount()
     assert(await oracle.stakeAmount() == h.toWei("1"), "stake amount not updated correctly")
   })
 
-  // it("vote on upgrade proposal", async function() {
-  //   await 
-  // })
+  it("rewards go to zero, big reward added, staker stakes", async function() {
+    // Setup
+    await tellor.connect(bigWallet).transfer(accounts[1].address, h.toWei("100"))
+    await tellor.connect(bigWallet).transfer(accounts[2].address, h.toWei("100"))
+    await tellor.connect(bigWallet).transfer(accounts[3].address, h.toWei("100"))
+    await tellor.connect(bigWallet).transfer(accounts[4].address, h.toWei("100"))
+    await tellor.connect(bigWallet).transfer(accounts[10].address, h.toWei("6000"))
+    await tellor.connect(accounts[1]).approve(oracle.address, h.toWei("1000000"))
+    await tellor.connect(accounts[2]).approve(oracle.address, h.toWei("100"))
+    await tellor.connect(accounts[3]).approve(oracle.address, h.toWei("100"))
+    await tellor.connect(accounts[4]).approve(oracle.address, h.toWei("100"))
+    await tellor.connect(accounts[10]).approve(oracle.address, h.toWei("100000"))
+
+    await oracle.connect(accounts[1]).depositStake(h.toWei("100"))
+    stakingRewardsBalance = await oracle.stakingRewardsBalance()
+    console.log("stakingRewardsBalance: ", web3.utils.fromWei(stakingRewardsBalance.toString()))
+    await oracle.connect(accounts[10]).addStakingRewards(h.toWei("1000"))
+    rewardRate = await oracle.rewardRate()
+    console.log("rewardRate: ", web3.utils.fromWei(rewardRate.toString()))
+    console.log("rewRCalc: ", web3.utils.fromWei((BigInt(rewardRate) * BigInt(30)).toString()))
+
+    await h.advanceTime(86400 * 40)
+
+    await oracle.connect(accounts[1]).requestStakingWithdraw(h.toWei("100"))
+    balanceStaker1 = await tellor.balanceOf(accounts[2].address)
+    stakingRewardsBalance = await oracle.stakingRewardsBalance()
+    console.log("stakingRewardsBalance: ", stakingRewardsBalance.toString())
+    console.log("balanceStaker1", web3.utils.fromWei(balanceStaker1.toString()))
+    assert(balanceStaker1 == h.toWei("1001"), "staker 2 should have 1000 TRB")
+  })
+
+  it("rewards go to zero, big reward added, staker stakes2", async function() {
+    // Setup
+    await tellor.connect(bigWallet).transfer(accounts[1].address, h.toWei("100"))
+    await tellor.connect(bigWallet).transfer(accounts[2].address, h.toWei("100"))
+    await tellor.connect(bigWallet).transfer(accounts[3].address, h.toWei("100"))
+    await tellor.connect(bigWallet).transfer(accounts[10].address, h.toWei("6000"))
+    await tellor.connect(accounts[1]).approve(oracle.address, h.toWei("1000000"))
+    await tellor.connect(accounts[2]).approve(oracle.address, h.toWei("100"))
+    await tellor.connect(accounts[3]).approve(oracle.address, h.toWei("100"))
+    await tellor.connect(accounts[10]).approve(oracle.address, h.toWei("100000"))
+
+    stakingRewardsBalance = await oracle.stakingRewardsBalance()
+    assert(stakingRewardsBalance == h.toWei("1"), "stakingRewardsBalance should start at 1 TRB")
+    await oracle.connect(accounts[10]).addStakingRewards(h.toWei("1000"))
+    stakingRewardsBalance = await oracle.stakingRewardsBalance()
+    assert(stakingRewardsBalance == h.toWei("1001"), "stakingRewardsBalance should be 1001 TRB")
+
+    await oracle.connect(accounts[1]).depositStake(h.toWei("100"))
+
+    rewardRate = await oracle.rewardRate()
+    expectedRewardRate = BigInt(h.toWei("1001")) / BigInt(30 * 86400)
+    assert(rewardRate == expectedRewardRate, "reward rate should be correct")
+
+    await h.advanceTime(86400 * 30)
+
+    await oracle.connect(accounts[1]).requestStakingWithdraw(h.toWei("100"))
+    balanceStaker1 = await tellor.balanceOf(accounts[1].address)
+    stakingRewardsBalance = await oracle.stakingRewardsBalance()
+    assert(stakingRewardsBalance == 0, "stakingRewardsBalance should be 0 TRB")
+    assert(balanceStaker1 == h.toWei("1001"), "staker 1 should have 1000 TRB reward")
+    
+    // stake more reporters, add more rewards
+    await oracle.connect(accounts[2]).depositStake(h.toWei("100"))
+    await oracle.connect(accounts[3]).depositStake(h.toWei("100"))
+    await oracle.connect(accounts[10]).addStakingRewards(h.toWei("1000"))
+    stakingRewardsBalance = await oracle.stakingRewardsBalance()
+    assert(stakingRewardsBalance == h.toWei("1000"), "stakingRewardsBalance should be 1000 TRB")
+
+    await h.advanceTime(86400 * 30)
+
+    await oracle.connect(accounts[2]).requestStakingWithdraw(h.toWei("100"))
+    await oracle.connect(accounts[3]).requestStakingWithdraw(h.toWei("100"))
+
+    balanceStaker2 = await tellor.balanceOf(accounts[2].address)
+    balanceStaker3 = await tellor.balanceOf(accounts[3].address)
+
+    assert(balanceStaker2 == h.toWei("500"), "staker 2 should have 500 TRB reward")
+    assert(balanceStaker3 == h.toWei("500"), "staker 3 should have 500 TRB reward")
+
+    stakingRewardsBalance = await oracle.stakingRewardsBalance()
+    assert(stakingRewardsBalance == 0, "stakingRewardsBalance should be 0 TRB")
+  })
+
+  it("usingtellor", async function() {
+    assert(1 == 0, "not implemented")
+  })
+
 })
+
+
+
