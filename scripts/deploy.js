@@ -111,6 +111,7 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     console.log("Starting deployment for QueryDataStorage contract...")
     const qstoragefac = await ethers.getContractFactory("autopay/contracts/QueryDataStorage.sol:QueryDataStorage", wallet)
     const qstorage = await qstoragefac.deploy()
+    console.log("QueryDataStorage contract deployed to: ", qstorage.address)
 
     await qstorage.deployed();
 
@@ -154,6 +155,11 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     // Otherwise the etherscan api doesn't find the deployed contract.
     console.log('waiting for flex tx confirmation...');
     await flex.deployTransaction.wait(7)
+
+    // init flex
+    console.log('initializing flex...');
+    await flex.init(governance.address)
+    console.log('flex initialized');
 
     console.log('submitting contract for verification...');
     await run("verify:verify",
