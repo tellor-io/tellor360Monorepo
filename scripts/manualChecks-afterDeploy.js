@@ -10,20 +10,23 @@ const h = require("../test/helpers/helpers");
 
 // npx hardhat run scripts/manualChecks-afterDeploy.js --network rinkeby
 
+// Update these values with newly deployed addresses
+const flexAddress = "0x943fDA606fA75c2E8918b72A4cF92b68040a1671";
+const govAddress = "0x5b58A793334aa4443775573ae6d47A931b5bde70";
+const autopayAddress = "0x2D3d3842F5cF39411317f1E28F042fcE409db4B9";
+const tellor360Address = "0xb4c938f5A5Db52Cf4A4B55d3439aAbc0944BCD63"; // newly deployed tellor360 address
+const queryDataStorageAddress = "0xb31BEb76c906cf8655F94b165759E5807c759aA5";
+
+// update these values on case by case basis
 const tokenAddress = "0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0";
-const flexAddress = "0x5209A3e0582fA366a8733806Ad3d9e3b36B1478f"; // old
-const govAddress = "0x30F101c2cF75E7A744B412B966330cb9F3c6824B"; // old
-const autopayAddress = "0x401bcD944c4512789692C80C279B516BfBB6F14C";
 const masterAddress = "0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0";
-const tellor360Address = "0xf2d85424Fd4716cf91dAC1911B60E72877Cc8D1A"; // newly deployed tellor360 address
-const queryDataStorageAddress = "0x3E2a203eD4D790Ff8159b9621c9C58a2F78Fcf51";
-const reportingLock = 3600 * 12; // 12 hours
 const stakeAmountDollarTarget = web3.utils.toWei("2500");
-const stakingTokenPrice = web3.utils.toWei("20");
-const stakingTokenPriceQueryId = "0x5c13cd9c97dbb98f2429c101a2a8150e6c7a0ddaff6124ee176a3a411067ded0";
+const stakingTokenPrice = web3.utils.toWei("16");
 const teamMultisigAddress = "0x2F51C4Bf6B66634187214A695be6CDd344d4e9d1"; // rinkeby
 
 // Don't change these
+const reportingLock = 3600 * 12; // 12 hours
+const stakingTokenPriceQueryId = "0x5c13cd9c97dbb98f2429c101a2a8150e6c7a0ddaff6124ee176a3a411067ded0";
 let passCount = 0;
 let failCount = 0;
 
@@ -121,6 +124,12 @@ async function manualChecks(_network, _pk, _nodeURL) {
     "Staking token price query ID set in flex"
   );
 
+  console.log("\nChecking initial stake amount set in flex...");
+  verifyEquals(
+    await flex.stakeAmount(),
+    BigInt(stakeAmountDollarTarget) * BigInt(1e18) / BigInt(stakingTokenPrice),
+    "Initial stake amount set in flex"
+  );
 
 
   ///////// TELLOR360
