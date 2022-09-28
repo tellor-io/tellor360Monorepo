@@ -12,7 +12,7 @@ const web3 = require('web3');
 var tokenAddress = '0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0';
 var reportingLock = 3600 * 12; // 12 hours
 var stakeAmountDollarTarget = web3.utils.toWei("2500");
-var stakingTokenPrice = web3.utils.toWei("20");
+var stakingTokenPrice = web3.utils.toWei("16");
 var stakingTokenPriceQueryId = '0x5c13cd9c97dbb98f2429c101a2a8150e6c7a0ddaff6124ee176a3a411067ded0'
 
 // governance arguments
@@ -151,6 +151,20 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
 
     //////////////// Verify contracts
 
+        // Wait for few confirmed transactions.
+    // Otherwise the etherscan api doesn't find the deployed contract.
+    console.log('waiting for tellor360 tx confirmation...');
+    await tellor360.deployTransaction.wait(7)
+
+    console.log('submitting contract for verification...');
+    await run("verify:verify",
+        {
+            address: tellor360.address,
+            constructorArguments: [flex.address]
+        },
+    )
+    console.log("Tellor360 contract verified")
+
     // Wait for few confirmed transactions.
     // Otherwise the etherscan api doesn't find the deployed contract.
     console.log('waiting for flex tx confirmation...');
@@ -170,6 +184,24 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     )
     console.log("TellorFlex contract verified")
 
+        // Wait for few confirmed transactions.
+    // Otherwise the etherscan api doesn't find the deployed contract.
+    console.log('waiting for autopay tx confirmation...');
+    await autopay.deployTransaction.wait(7)
+
+    console.log('submitting autopay contract for verification...');
+    await run("verify:verify",
+        {
+            address: autopay.address,
+            constructorArguments: [flex.address, qstorage.address, _autopayFee]
+        },
+    )
+    console.log("autopay contract verified")
+
+
+
+
+
     // Wait for few confirmed transactions.
     // Otherwise the etherscan api doesn't find the deployed contract.
     console.log('waiting for governance tx confirmation...');
@@ -185,21 +217,6 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     )
     console.log("Governance contract verified")
 
-
-    // Wait for few confirmed transactions.
-    // Otherwise the etherscan api doesn't find the deployed contract.
-    console.log('waiting for tellor360 tx confirmation...');
-    await tellor360.deployTransaction.wait(7)
-
-    console.log('submitting contract for verification...');
-    await run("verify:verify",
-        {
-            address: tellor360.address,
-            constructorArguments: [flex.address]
-        },
-    )
-    console.log("Tellor360 contract verified")
-
     // Wait for few confirmed transactions.
     // Otherwise the etherscan api doesn't find the deployed contract.
     console.log('waiting for query data storage tx confirmation...');
@@ -213,19 +230,7 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     )
     console.log("query data storage contract verified")
 
-    // Wait for few confirmed transactions.
-    // Otherwise the etherscan api doesn't find the deployed contract.
-    console.log('waiting for autopay tx confirmation...');
-    await autopay.deployTransaction.wait(7)
 
-    console.log('submitting autopay contract for verification...');
-    await run("verify:verify",
-        {
-            address: autopay.address,
-            constructorArguments: [flex.address, qstorage.address, _autopayFee]
-        },
-    )
-    console.log("governance contract verified")
 
 }
 
