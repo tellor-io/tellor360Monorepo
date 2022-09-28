@@ -7,20 +7,21 @@ const { keccak256 } = require("ethers/lib/utils");
 
 describe("Forking Tests - Before Transition", function() {
 
-  // rinkeby
-  const tellorMaster = "0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0"
-  const DEV_WALLET = "0x2F51C4Bf6B66634187214A695be6CDd344d4e9d1"
-  const BIGWALLET = "0x41c5a04f61b865e084e5f502ff322ad624cad609"
-  const CURR_GOV = "0xA64Bb0078eB80c97484f3f09Adb47b9B73CBcA00"
-  const REPORTER = "0x0D4F81320d36d7B7Cf5fE7d1D547f63EcBD1a3E0"
-  const TELLORX_ORACLE = "0x18431fd88adF138e8b979A7246eb58EA7126ea16"
-  // tellor360
+  // tellor360 - update these
   const ORACLE360 = "0x09316E89e0D1BF40D21edc8Aba38980F3e711Ef6"
   const GOVERNANCE360 = "0x5bbE24d18F13047f4299dacA7e1435c4fec56384"
   const AUTOPAY360 = "0x97149c8CdE2a7baA71384BAA02c4814A35F9604e"
   const TELLOR360 = "0xF667Ed2BA355298649c7eb23ae7385cdc181B648"
   const QUERY_DATA_STORAGE = "0x638b138B5470DB078f6Ee0fC45935a38D2eEc1Cc"
 
+  // rinkeby pre360 addresses
+  const tellorMaster = "0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0"
+  const DEV_WALLET = "0x2F51C4Bf6B66634187214A695be6CDd344d4e9d1"
+  const BIGWALLET = "0x41c5a04f61b865e084e5f502ff322ad624cad609"
+  const CURR_GOV = "0xA64Bb0078eB80c97484f3f09Adb47b9B73CBcA00"
+  const REPORTER = "0x0D4F81320d36d7B7Cf5fE7d1D547f63EcBD1a3E0"
+  const TELLORX_ORACLE = "0x18431fd88adF138e8b979A7246eb58EA7126ea16"
+  
   const abiCoder = new ethers.utils.AbiCoder();
   const AUTOPAY_QUERY_DATA_ARGS = abiCoder.encode(["bytes"], ["0x"])
   const AUTOPAY_QUERY_DATA = abiCoder.encode(["string", "bytes"], ["AutopayAddresses", AUTOPAY_QUERY_DATA_ARGS])
@@ -317,8 +318,13 @@ describe("Forking Tests - Before Transition", function() {
     assert(await tellor.balanceOf(accounts[3].address) == BigInt(balanceStaker3) + BigInt(h.toWei("100")), "staker 3 balance should be correct")
   })
 
-  it("stake 10 reporters, report 50 values", async function() {
+  it("stake 10 reporters, report 50 values, multiple times", async function() {
     this.timeout(20000000)
+    oracleBalance = await tellor.balanceOf(oracle.address)
+    totalStakeAmount = await oracle.totalStakeAmount()
+    stakingRewardsBalance = await oracle.stakingRewardsBalance()
+    timeBasedRewardsBalance = await oracle.getTotalTimeBasedRewardsBalance()
+
     // Setup
     await tellor.connect(bigWallet).transfer(accounts[1].address, h.toWei("1000"))
     await tellor.connect(bigWallet).transfer(accounts[2].address, h.toWei("1000"))
@@ -347,6 +353,8 @@ describe("Forking Tests - Before Transition", function() {
     }
 
     for (i = 0; i<5; i++) {
+      await tellor.connect(bigWallet).transfer(oracle.address, h.toWei("1")) // tb rewards
+
       await oracle.connect(accounts[1]).submitValue(h.uintTob32(1), h.uintTob32(100 + i), 0, '0x')
       await oracle.connect(accounts[2]).submitValue(h.uintTob32(2), h.uintTob32(200 + i), 0, '0x')
       await oracle.connect(accounts[3]).submitValue(h.uintTob32(3), h.uintTob32(300 + i), 0, '0x')
@@ -359,7 +367,6 @@ describe("Forking Tests - Before Transition", function() {
       await oracle.connect(accounts[10]).submitValue(h.uintTob32(10), h.uintTob32(1000 + i), 0, '0x')
 
       await oracle.connect(bigWallet).addStakingRewards(h.toWei("1"))
-      await tellor.connect(bigWallet).transfer(oracle.address, h.toWei("1")) // tb rewards
       await h.advanceTime(86400/2)
     }
 
@@ -393,133 +400,138 @@ describe("Forking Tests - Before Transition", function() {
     totalStakeAmount = await oracle.totalStakeAmount()
     stakingRewardsBalance = await oracle.stakingRewardsBalance()
     timeBasedRewardsBalance = await oracle.getTotalTimeBasedRewardsBalance()
+    oracleTokenPoolsSum = BigInt(totalStakeAmount) + BigInt(stakingRewardsBalance) + BigInt(timeBasedRewardsBalance)
 
-    console.log("oracleBalance:           ", oracleBalance)
-    console.log("totalStakeAmount:        ", totalStakeAmount)
-    console.log("stakingRewardsBalance:   ", stakingRewardsBalance)
-    console.log("timeBasedRewardsBalance: ", timeBasedRewardsBalance)
-
-    // assert(await tellor.balanceOf(oracle.address) == 0, "oracle balance should be 0")
-
-
-
-
-    // for (let i = 1; i <= 10; i++) {
-    //   await oracle.connect(accounts[i]).depositStake(h.toWei("200"))
-    // }
-
-    // for (i = 0; i<5; i++) {
-    //   await oracle.connect(accounts[1]).submitValue(h.uintTob32(1), h.uintTob32(100 + i), 0, '0x')
-    //   await oracle.connect(accounts[2]).submitValue(h.uintTob32(2), h.uintTob32(200 + i), 0, '0x')
-    //   await oracle.connect(accounts[3]).submitValue(h.uintTob32(3), h.uintTob32(300 + i), 0, '0x')
-    //   await oracle.connect(accounts[4]).submitValue(h.uintTob32(4), h.uintTob32(400 + i), 0, '0x')
-    //   await oracle.connect(accounts[5]).submitValue(h.uintTob32(5), h.uintTob32(500 + i), 0, '0x')
-    //   await oracle.connect(accounts[6]).submitValue(h.uintTob32(6), h.uintTob32(600 + i), 0, '0x')
-    //   await oracle.connect(accounts[7]).submitValue(h.uintTob32(7), h.uintTob32(700 + i), 0, '0x')
-    //   await oracle.connect(accounts[8]).submitValue(h.uintTob32(8), h.uintTob32(800 + i), 0, '0x')
-    //   await oracle.connect(accounts[9]).submitValue(h.uintTob32(9), h.uintTob32(900 + i), 0, '0x')
-    //   await oracle.connect(accounts[10]).submitValue(h.uintTob32(10), h.uintTob32(1000 + i), 0, '0x')
-
-    //   await oracle.connect(bigWallet).addStakingRewards(h.toWei("1"))
-    //   await h.advanceTime(86400/2)
-    // }
-
-    // for (let i = 1; i <= 10; i++) {
-    //   await oracle.connect(accounts[i]).requestStakingWithdraw(h.toWei("100"))
-    // }
-
-    // for (let i = 1; i <= 10; i++) {
-    //   await oracle.connect(accounts[i]).depositStake(h.toWei("200"))
-    // }
-
-    // await h.advanceTime(86400 * 40)
-
-    // for (let i = 1; i <= 10; i++) {
-    //   await oracle.connect(accounts[i]).requestStakingWithdraw(h.toWei("300"))
-    // }
-
-    // await h.advanceTime(86400 * 7)
-
-    // for (let i = 1; i <= 10; i++) {
-    //   await oracle.connect(accounts[i]).withdrawStake()
-    // }
-
-    // balanceStaker1 = await tellor.balanceOf(accounts[1].address)
-    // balanceStaker10 = await tellor.balanceOf(accounts[10].address)
-    // diff = BigInt(balanceStaker1) - BigInt(balanceStaker10)
-
-    // assert(diff < h.toWei("0.0001"), "diff should be less than 0.0001")
-
-    // oracleBalance = await tellor.balanceOf(oracle.address)
-    // totalStakeAmount = await oracle.totalStakeAmount()
-    // stakingRewardsBalance = await oracle.stakingRewardsBalance()
-    // timeBasedRewardsBalance = await oracle.getTotalTimeBasedRewardsBalance()
-
-    // console.log("oracleBalance:           ", oracleBalance)
-    // console.log("totalStakeAmount:        ", totalStakeAmount)
-    // console.log("stakingRewardsBalance:   ", stakingRewardsBalance)
-    // console.log("timeBasedRewardsBalance: ", timeBasedRewardsBalance)
-
-
-
-
-    // for (let i = 1; i <= 10; i++) {
-    //   await oracle.connect(accounts[i]).depositStake(h.toWei("200"))
-    // }
-
-    // for (i = 0; i<5; i++) {
-    //   await oracle.connect(accounts[1]).submitValue(h.uintTob32(1), h.uintTob32(100 + i), 0, '0x')
-    //   await oracle.connect(accounts[2]).submitValue(h.uintTob32(2), h.uintTob32(200 + i), 0, '0x')
-    //   await oracle.connect(accounts[3]).submitValue(h.uintTob32(3), h.uintTob32(300 + i), 0, '0x')
-    //   await oracle.connect(accounts[4]).submitValue(h.uintTob32(4), h.uintTob32(400 + i), 0, '0x')
-    //   await oracle.connect(accounts[5]).submitValue(h.uintTob32(5), h.uintTob32(500 + i), 0, '0x')
-    //   await oracle.connect(accounts[6]).submitValue(h.uintTob32(6), h.uintTob32(600 + i), 0, '0x')
-    //   await oracle.connect(accounts[7]).submitValue(h.uintTob32(7), h.uintTob32(700 + i), 0, '0x')
-    //   await oracle.connect(accounts[8]).submitValue(h.uintTob32(8), h.uintTob32(800 + i), 0, '0x')
-    //   await oracle.connect(accounts[9]).submitValue(h.uintTob32(9), h.uintTob32(900 + i), 0, '0x')
-    //   await oracle.connect(accounts[10]).submitValue(h.uintTob32(10), h.uintTob32(1000 + i), 0, '0x')
-
-    //   await oracle.connect(bigWallet).addStakingRewards(h.toWei("1"))
-    //   await oracle.connect(bigWallet).addTimeBasedRewards(h.toWei("1"))
-    //   await h.advanceTime(86400/2)
-    // }
-
-    // for (let i = 1; i <= 10; i++) {
-    //   await oracle.connect(accounts[i]).requestStakingWithdraw(h.toWei("100"))
-    // }
-
-    // for (let i = 1; i <= 10; i++) {
-    //   await oracle.connect(accounts[i]).depositStake(h.toWei("200"))
-    // }
-
-    // await h.advanceTime(86400 * 40)
-
-    // for (let i = 1; i <= 10; i++) {
-    //   await oracle.connect(accounts[i]).requestStakingWithdraw(h.toWei("300"))
-    // }
-
-    // await h.advanceTime(86400 * 7)
-
-    // for (let i = 1; i <= 10; i++) {
-    //   await oracle.connect(accounts[i]).withdrawStake()
-    // }
-
-    // balanceStaker1 = await tellor.balanceOf(accounts[1].address)
-    // balanceStaker10 = await tellor.balanceOf(accounts[10].address)
-    // diff = BigInt(balanceStaker1) - BigInt(balanceStaker10)
-
-    // assert(diff < h.toWei("0.0001"), "diff should be less than 0.0001")
-
-    // oracleBalance = await tellor.balanceOf(oracle.address)
-    // totalStakeAmount = await oracle.totalStakeAmount()
-    // stakingRewardsBalance = await oracle.stakingRewardsBalance()
-    // timeBasedRewardsBalance = await oracle.getTotalTimeBasedRewardsBalance()
-
-    // console.log("oracleBalance:           ", oracleBalance)
-    // console.log("totalStakeAmount:        ", totalStakeAmount)
-    // console.log("stakingRewardsBalance:   ", stakingRewardsBalance)
-    // console.log("timeBasedRewardsBalance: ", timeBasedRewardsBalance)
+    assert(await tellor.balanceOf(oracle.address) < 4000, "oracle balance should be 0")
+    assert(totalStakeAmount == 0, "totalStakeAmount should be 0")
+    assert(stakingRewardsBalance < 4000, "stakingRewardsBalance should be 0")
+    assert(timeBasedRewardsBalance == 0, "timeBasedRewardsBalance should be 0")
+    assert(oracleTokenPoolsSum == oracleBalance, "oracleTokenPoolsSum should be equal to oracleBalance")
     
+
+
+
+
+    for (let i = 1; i <= 10; i++) {
+      await oracle.connect(accounts[i]).depositStake(h.toWei("200"))
+    }
+
+    for (i = 0; i<5; i++) {
+      await tellor.connect(bigWallet).transfer(oracle.address, h.toWei("1")) // tb rewards
+
+      await oracle.connect(accounts[1]).submitValue(h.uintTob32(1), h.uintTob32(100 + i), 0, '0x')
+      await oracle.connect(accounts[2]).submitValue(h.uintTob32(2), h.uintTob32(200 + i), 0, '0x')
+      await oracle.connect(accounts[3]).submitValue(h.uintTob32(3), h.uintTob32(300 + i), 0, '0x')
+      await oracle.connect(accounts[4]).submitValue(h.uintTob32(4), h.uintTob32(400 + i), 0, '0x')
+      await oracle.connect(accounts[5]).submitValue(h.uintTob32(5), h.uintTob32(500 + i), 0, '0x')
+      await oracle.connect(accounts[6]).submitValue(h.uintTob32(6), h.uintTob32(600 + i), 0, '0x')
+      await oracle.connect(accounts[7]).submitValue(h.uintTob32(7), h.uintTob32(700 + i), 0, '0x')
+      await oracle.connect(accounts[8]).submitValue(h.uintTob32(8), h.uintTob32(800 + i), 0, '0x')
+      await oracle.connect(accounts[9]).submitValue(h.uintTob32(9), h.uintTob32(900 + i), 0, '0x')
+      await oracle.connect(accounts[10]).submitValue(h.uintTob32(10), h.uintTob32(1000 + i), 0, '0x')
+
+      await oracle.connect(bigWallet).addStakingRewards(h.toWei("1"))
+      await h.advanceTime(86400/2)
+    }
+
+    for (let i = 1; i <= 10; i++) {
+      await oracle.connect(accounts[i]).requestStakingWithdraw(h.toWei("100"))
+    }
+
+    for (let i = 1; i <= 10; i++) {
+      await oracle.connect(accounts[i]).depositStake(h.toWei("200"))
+    }
+
+    await h.advanceTime(86400 * 40)
+
+    for (let i = 1; i <= 10; i++) {
+      await oracle.connect(accounts[i]).requestStakingWithdraw(h.toWei("300"))
+    }
+
+    await h.advanceTime(86400 * 7)
+
+    for (let i = 1; i <= 10; i++) {
+      await oracle.connect(accounts[i]).withdrawStake()
+    }
+
+    balanceStaker2 = await tellor.balanceOf(accounts[2].address)
+    balanceStaker10 = await tellor.balanceOf(accounts[10].address)
+    diff = BigInt(balanceStaker2) - BigInt(balanceStaker10)
+
+    assert(diff < h.toWei("0.0001"), "diff should be less than 0.0001")
+
+    oracleBalance = await tellor.balanceOf(oracle.address)
+    totalStakeAmount = await oracle.totalStakeAmount()
+    stakingRewardsBalance = await oracle.stakingRewardsBalance()
+    timeBasedRewardsBalance = await oracle.getTotalTimeBasedRewardsBalance()
+    oracleTokenPoolsSum = BigInt(totalStakeAmount) + BigInt(stakingRewardsBalance) + BigInt(timeBasedRewardsBalance)
+
+    assert(await tellor.balanceOf(oracle.address) < 4000, "oracle balance should be 0")
+    assert(totalStakeAmount == 0, "totalStakeAmount should be 0")
+    assert(stakingRewardsBalance < 4000, "stakingRewardsBalance should be 0")
+    assert(timeBasedRewardsBalance == 0, "timeBasedRewardsBalance should be 0")
+    assert(oracleTokenPoolsSum == oracleBalance, "oracleTokenPoolsSum should be equal to oracleBalance")
+
+
+    for (let i = 1; i <= 10; i++) {
+      await oracle.connect(accounts[i]).depositStake(h.toWei("200"))
+    }
+
+    for (i = 0; i<5; i++) {
+      await tellor.connect(bigWallet).transfer(oracle.address, h.toWei("1")) // tb rewards
+
+      await oracle.connect(accounts[1]).submitValue(h.uintTob32(1), h.uintTob32(100 + i), 0, '0x')
+      await oracle.connect(accounts[2]).submitValue(h.uintTob32(2), h.uintTob32(200 + i), 0, '0x')
+      await oracle.connect(accounts[3]).submitValue(h.uintTob32(3), h.uintTob32(300 + i), 0, '0x')
+      await oracle.connect(accounts[4]).submitValue(h.uintTob32(4), h.uintTob32(400 + i), 0, '0x')
+      await oracle.connect(accounts[5]).submitValue(h.uintTob32(5), h.uintTob32(500 + i), 0, '0x')
+      await oracle.connect(accounts[6]).submitValue(h.uintTob32(6), h.uintTob32(600 + i), 0, '0x')
+      await oracle.connect(accounts[7]).submitValue(h.uintTob32(7), h.uintTob32(700 + i), 0, '0x')
+      await oracle.connect(accounts[8]).submitValue(h.uintTob32(8), h.uintTob32(800 + i), 0, '0x')
+      await oracle.connect(accounts[9]).submitValue(h.uintTob32(9), h.uintTob32(900 + i), 0, '0x')
+      await oracle.connect(accounts[10]).submitValue(h.uintTob32(10), h.uintTob32(1000 + i), 0, '0x')
+
+      await oracle.connect(bigWallet).addStakingRewards(h.toWei("1"))
+      await h.advanceTime(86400/2)
+    }
+
+    for (let i = 1; i <= 10; i++) {
+      await oracle.connect(accounts[i]).requestStakingWithdraw(h.toWei("100"))
+    }
+
+    for (let i = 1; i <= 10; i++) {
+      await oracle.connect(accounts[i]).depositStake(h.toWei("200"))
+    }
+
+    await h.advanceTime(86400 * 40)
+
+    for (let i = 1; i <= 10; i++) {
+      await oracle.connect(accounts[i]).requestStakingWithdraw(h.toWei("300"))
+    }
+
+    await h.advanceTime(86400 * 7)
+
+    for (let i = 1; i <= 10; i++) {
+      await oracle.connect(accounts[i]).withdrawStake()
+    }
+
+    balanceStaker2 = await tellor.balanceOf(accounts[2].address)
+    balanceStaker10 = await tellor.balanceOf(accounts[10].address)
+    diff = BigInt(balanceStaker2) - BigInt(balanceStaker10)
+
+    assert(diff < h.toWei("0.0001"), "diff should be less than 0.0001")
+
+    oracleBalance = await tellor.balanceOf(oracle.address)
+    totalStakeAmount = await oracle.totalStakeAmount()
+    stakingRewardsBalance = await oracle.stakingRewardsBalance()
+    timeBasedRewardsBalance = await oracle.getTotalTimeBasedRewardsBalance()
+    oracleTokenPoolsSum = BigInt(totalStakeAmount) + BigInt(stakingRewardsBalance) + BigInt(timeBasedRewardsBalance)
+
+    assert(await tellor.balanceOf(oracle.address) < 4000, "oracle balance should be 0")
+    assert(totalStakeAmount == 0, "totalStakeAmount should be 0")
+    assert(stakingRewardsBalance < 4000, "stakingRewardsBalance should be 0")
+    assert(timeBasedRewardsBalance == 0, "timeBasedRewardsBalance should be 0")
+    assert(oracleTokenPoolsSum == oracleBalance, "oracleTokenPoolsSum should be equal to oracleBalance")
   })
 
   it("usingtellor", async function() {
@@ -619,8 +631,42 @@ describe("Forking Tests - Before Transition", function() {
     assert(valueRetrieved[2] == 200, "status code should be 200")
   })
 
-  it("staking reward balance rounding error", async function() {
-    require(1 == 0, "test not implemented")
+  it("stakingRewards rounding error", async function() {
+    this.timeout(20000000)
+
+    // Setup
+    await tellor.connect(bigWallet).transfer(accounts[1].address, h.toWei("1000"))
+    await tellor.connect(bigWallet).transfer(accounts[2].address, h.toWei("1000"))
+    await tellor.connect(accounts[1]).approve(oracle.address, h.toWei("1000000000"))
+    await tellor.connect(accounts[2]).approve(oracle.address, h.toWei("1000000000"))
+    await tellor.connect(bigWallet).approve(oracle.address, h.toWei("1000000"))
+
+    for(let i = 0; i < 50; i++) {
+      await oracle.connect(bigWallet).addStakingRewards(h.toWei("1"))
+      await h.advanceTime(86400)
+      await oracle.connect(accounts[1]).depositStake(h.toWei("1000"))
+      await h.advanceTime(86400)
+      await oracle.connect(accounts[2]).depositStake(h.toWei("1000"))
+      await h.advanceTime(86400 * 40)
+      await oracle.connect(accounts[1]).requestStakingWithdraw(h.toWei("1000"))
+      await h.advanceTime(86400)
+      await oracle.connect(accounts[2]).requestStakingWithdraw(h.toWei("1000"))
+      await h.advanceTime(86400 * 8)
+      await oracle.connect(accounts[1]).withdrawStake()
+      await oracle.connect(accounts[2]).withdrawStake()
+    }
+
+    oracleBalance = await tellor.balanceOf(oracle.address)
+    totalStakeAmount = await oracle.totalStakeAmount()
+    stakingRewardsBalance = await oracle.stakingRewardsBalance()
+    timeBasedRewardsBalance = await oracle.getTotalTimeBasedRewardsBalance()
+    oracleTokenPoolsSum = BigInt(totalStakeAmount) + BigInt(stakingRewardsBalance) + BigInt(timeBasedRewardsBalance)
+
+    assert(oracleBalance < 2000, "oracleBalance should be less than min rounding error")
+    assert(totalStakeAmount == 0, "totalStakeAmount should be 0")
+    assert(stakingRewardsBalance < 2000, "stakingRewardsBalance should be less than min rounding error")
+    assert(timeBasedRewardsBalance == 0, "timeBasedRewardsBalance should be 0")
+    assert(oracleBalance == oracleTokenPoolsSum, "oracleBalance should be equal to oracleTokenPoolsSum")
   })
 })
 
