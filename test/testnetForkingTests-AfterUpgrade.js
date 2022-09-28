@@ -286,7 +286,6 @@ describe("Forking Tests - After Transition", function() {
     await tellor.connect(accounts[10]).approve(oracle.address, h.toWei("100000"))
 
     stakingRewardsBalance = await oracle.stakingRewardsBalance()
-    console.log("stakingRewardsBalance: ", stakingRewardsBalance.toString())
     assert(stakingRewardsBalance == h.toWei("1"), "stakingRewardsBalance should start at 1 TRB")
     await oracle.connect(accounts[10]).addStakingRewards(h.toWei("1000"))
     stakingRewardsBalance = await oracle.stakingRewardsBalance()
@@ -691,9 +690,7 @@ describe("Forking Tests - After Transition", function() {
   it("mint initial time based rewards", async function() {
     await tellor.mintToOracle()
     oracleBalance = await tellor.balanceOf(oracle.address)
-    expectedBalance = BigInt(h.toWei("146.94")) * BigInt(7 * 12 * 86400 + 1) / BigInt(86400) // + (BigInt(h.toWei("146.94")) / BigInt(86400))
-    console.log("oracleBalance:   " + oracleBalance.toString())
-    console.log("expectedBalance: " + expectedBalance.toString())
+    expectedBalance = BigInt(h.toWei("146.94")) * BigInt(7 * 12 * 86400 + 1) / BigInt(86400) + BigInt(h.toWei("1")) // + (BigInt(h.toWei("146.94")) / BigInt(86400))
     assert(oracleBalance == expectedBalance, "oracleBalance should be correct")
   })
 })
