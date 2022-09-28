@@ -8,11 +8,11 @@ const { keccak256 } = require("ethers/lib/utils");
 describe("Forking Tests - Before Transition", function() {
 
   // tellor360 - update these
-  const ORACLE360 = "0x09316E89e0D1BF40D21edc8Aba38980F3e711Ef6"
-  const GOVERNANCE360 = "0x5bbE24d18F13047f4299dacA7e1435c4fec56384"
-  const AUTOPAY360 = "0x97149c8CdE2a7baA71384BAA02c4814A35F9604e"
-  const TELLOR360 = "0xF667Ed2BA355298649c7eb23ae7385cdc181B648"
-  const QUERY_DATA_STORAGE = "0x638b138B5470DB078f6Ee0fC45935a38D2eEc1Cc"
+  const ORACLE360 = "0x943fDA606fA75c2E8918b72A4cF92b68040a1671"
+  const GOVERNANCE360 = "0x5b58A793334aa4443775573ae6d47A931b5bde70"
+  const AUTOPAY360 = "0x2D3d3842F5cF39411317f1E28F042fcE409db4B9"
+  const TELLOR360 = "0xb4c938f5A5Db52Cf4A4B55d3439aAbc0944BCD63"
+  const QUERY_DATA_STORAGE = "0xb31BEb76c906cf8655F94b165759E5807c759aA5"
 
   // rinkeby pre360 addresses
   const tellorMaster = "0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0"
@@ -48,7 +48,7 @@ describe("Forking Tests - Before Transition", function() {
       method: "hardhat_reset",
       params: [{forking: {
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 11384844
+            blockNumber: 11459700
           },},],
       });
 
@@ -105,10 +105,10 @@ describe("Forking Tests - Before Transition", function() {
     await tellor.connect(bigWallet).transfer(accounts[1].address, h.toWei("1000"))
     await tellor.connect(accounts[1]).approve(oracle.address, h.toWei("1000"))
     await oracle.connect(accounts[1]).depositStake(h.toWei("1000"))
-    await oracle.connect(accounts[1]).submitValue(h.uintTob32(1), h.uintTob32(1000), 0, '0x')
+    await oracle.connect(accounts[1]).submitValue(keccak256(h.uintTob32(1)), h.uintTob32(1000), 0, h.uintTob32(1))
     blocky = await h.getBlock()
 
-    let value = await oracle.retrieveData(h.uintTob32(1), blocky.timestamp)
+    let value = await oracle.retrieveData(keccak256(h.uintTob32(1)), blocky.timestamp)
     assert(value == h.uintTob32(1000), "value not reported correctly")
   })
 
@@ -131,10 +131,10 @@ describe("Forking Tests - Before Transition", function() {
     await tellor.connect(accounts[1]).approve(oracle.address, h.toWei("1000"))
     await tellor.connect(accounts[2]).approve(governance.address, h.toWei("1000"))
     await oracle.connect(accounts[1]).depositStake(h.toWei("1000"))
-    await oracle.connect(accounts[1]).submitValue(h.uintTob32(1), h.uintTob32(1000), 0, '0x')
+    await oracle.connect(accounts[1]).submitValue(keccak256(h.uintTob32(1)), h.uintTob32(1000), 0, h.uintTob32(1))
     blocky = await h.getBlock()
 
-    await governance.connect(accounts[2]).beginDispute(h.uintTob32(1), blocky.timestamp)
+    await governance.connect(accounts[2]).beginDispute(keccak256(h.uintTob32(1)), blocky.timestamp)
     await governance.connect(devWallet).vote(1, true, false)
     await governance.connect(bigWallet).vote(1, true, false)
 
@@ -161,14 +161,14 @@ describe("Forking Tests - Before Transition", function() {
     await oracle.connect(accounts[1]).depositStake(h.toWei("1000"))
 
     blocky0 = await h.getBlock()
-    feedId = web3.utils.keccak256(abiCoder.encode(["bytes32", "uint256", "uint256", "uint256", "uint256", "uint256", "uint256"], [h.uintTob32(1), h.toWei("1"), blocky0.timestamp, 3600, 600, 0, 0]))
-    await autopay.connect(accounts[2]).setupDataFeed(h.uintTob32(1), h.toWei("1"), blocky0.timestamp, 3600, 600, 0, 0, '0x', h.toWei("100"))
-    await oracle.connect(accounts[1]).submitValue(h.uintTob32(1), h.uintTob32(1000), 0, '0x')
+    feedId = web3.utils.keccak256(abiCoder.encode(["bytes32", "uint256", "uint256", "uint256", "uint256", "uint256", "uint256"], [keccak256(h.uintTob32(1)), h.toWei("1"), blocky0.timestamp, 3600, 600, 0, 0]))
+    await autopay.connect(accounts[2]).setupDataFeed(keccak256(h.uintTob32(1)), h.toWei("1"), blocky0.timestamp, 3600, 600, 0, 0, h.uintTob32(1), h.toWei("100"))
+    await oracle.connect(accounts[1]).submitValue(keccak256(h.uintTob32(1)), h.uintTob32(1000), 0, h.uintTob32(1))
     blocky1 = await h.getBlock()
 
     await h.advanceTime(86400/2)
 
-    await autopay.connect(accounts[1]).claimTip(feedId, h.uintTob32(1), [blocky1.timestamp])
+    await autopay.connect(accounts[1]).claimTip(feedId, keccak256(h.uintTob32(1)), [blocky1.timestamp])
     expectedBalance = BigInt(h.toWei("1")) * BigInt(98) / BigInt(100)
     assert(await tellor.balanceOf(accounts[1].address) == expectedBalance, "balance not updated correctly")
   })
@@ -180,13 +180,13 @@ describe("Forking Tests - Before Transition", function() {
     await tellor.connect(accounts[2]).approve(autopay.address, h.toWei("1000"))
     await oracle.connect(accounts[1]).depositStake(h.toWei("1000"))
 
-    await autopay.connect(accounts[2]).tip(h.uintTob32(1), h.toWei("1"), '0x')
-    await oracle.connect(accounts[1]).submitValue(h.uintTob32(1), h.uintTob32(1000), 0, '0x')
+    await autopay.connect(accounts[2]).tip(keccak256(h.uintTob32(1)), h.toWei("1"), h.uintTob32(1))
+    await oracle.connect(accounts[1]).submitValue(keccak256(h.uintTob32(1)), h.uintTob32(1000), 0, h.uintTob32(1))
     blocky1 = await h.getBlock()
 
     await h.advanceTime(86400/2)
 
-    await autopay.connect(accounts[1]).claimOneTimeTip(h.uintTob32(1), [blocky1.timestamp])
+    await autopay.connect(accounts[1]).claimOneTimeTip(keccak256(h.uintTob32(1)), [blocky1.timestamp])
     expectedBalance = BigInt(h.toWei("1")) * BigInt(98) / BigInt(100)
     assert(await tellor.balanceOf(accounts[1].address) == expectedBalance, "balance not updated correctly")
   })
@@ -210,12 +210,12 @@ describe("Forking Tests - Before Transition", function() {
     await h.advanceTime(86400/2)
 
     blocky0 = await h.getBlock()
-    await autopay.connect(accounts[2]).setupDataFeed(h.uintTob32(1), h.toWei("1"), blocky0.timestamp, 3600, 600, 0, 0, '0x', h.toWei("1000"))
+    await autopay.connect(accounts[2]).setupDataFeed(keccak256(h.uintTob32(1)), h.toWei("1"), blocky0.timestamp, 3600, 600, 0, 0, h.uintTob32(1), h.toWei("1000"))
 
-    await oracle.connect(accounts[1]).submitValue(h.uintTob32(1), h.uintTob32(1000), 0, '0x')
+    await oracle.connect(accounts[1]).submitValue(keccak256(h.uintTob32(1)), h.uintTob32(1000), 0, h.uintTob32(1))
     blocky1 = await h.getBlock()
 
-    await governance.connect(accounts[3]).beginDispute(h.uintTob32(1), blocky1.timestamp)
+    await governance.connect(accounts[3]).beginDispute(keccak256(h.uintTob32(1)), blocky1.timestamp)
 
     await governance.connect(accounts[2]).vote(1, true, false)
     await governance.connect(devWallet).vote(1, true, false)
@@ -355,16 +355,16 @@ describe("Forking Tests - Before Transition", function() {
     for (i = 0; i<5; i++) {
       await tellor.connect(bigWallet).transfer(oracle.address, h.toWei("1")) // tb rewards
 
-      await oracle.connect(accounts[1]).submitValue(h.uintTob32(1), h.uintTob32(100 + i), 0, '0x')
-      await oracle.connect(accounts[2]).submitValue(h.uintTob32(2), h.uintTob32(200 + i), 0, '0x')
-      await oracle.connect(accounts[3]).submitValue(h.uintTob32(3), h.uintTob32(300 + i), 0, '0x')
-      await oracle.connect(accounts[4]).submitValue(h.uintTob32(4), h.uintTob32(400 + i), 0, '0x')
-      await oracle.connect(accounts[5]).submitValue(h.uintTob32(5), h.uintTob32(500 + i), 0, '0x')
-      await oracle.connect(accounts[6]).submitValue(h.uintTob32(6), h.uintTob32(600 + i), 0, '0x')
-      await oracle.connect(accounts[7]).submitValue(h.uintTob32(7), h.uintTob32(700 + i), 0, '0x')
-      await oracle.connect(accounts[8]).submitValue(h.uintTob32(8), h.uintTob32(800 + i), 0, '0x')
-      await oracle.connect(accounts[9]).submitValue(h.uintTob32(9), h.uintTob32(900 + i), 0, '0x')
-      await oracle.connect(accounts[10]).submitValue(h.uintTob32(10), h.uintTob32(1000 + i), 0, '0x')
+      await oracle.connect(accounts[1]).submitValue(keccak256(h.uintTob32(1)), h.uintTob32(100 + i), 0, h.uintTob32(1))
+      await oracle.connect(accounts[2]).submitValue(keccak256(h.uintTob32(2)), h.uintTob32(200 + i), 0, h.uintTob32(2))
+      await oracle.connect(accounts[3]).submitValue(keccak256(h.uintTob32(3)), h.uintTob32(300 + i), 0, h.uintTob32(3))
+      await oracle.connect(accounts[4]).submitValue(keccak256(h.uintTob32(4)), h.uintTob32(400 + i), 0, h.uintTob32(4))
+      await oracle.connect(accounts[5]).submitValue(keccak256(h.uintTob32(5)), h.uintTob32(500 + i), 0, h.uintTob32(5))
+      await oracle.connect(accounts[6]).submitValue(keccak256(h.uintTob32(6)), h.uintTob32(600 + i), 0, h.uintTob32(6))
+      await oracle.connect(accounts[7]).submitValue(keccak256(h.uintTob32(7)), h.uintTob32(700 + i), 0, h.uintTob32(7))
+      await oracle.connect(accounts[8]).submitValue(keccak256(h.uintTob32(8)), h.uintTob32(800 + i), 0, h.uintTob32(8))
+      await oracle.connect(accounts[9]).submitValue(keccak256(h.uintTob32(9)), h.uintTob32(900 + i), 0, h.uintTob32(9))
+      await oracle.connect(accounts[10]).submitValue(keccak256(h.uintTob32(10)), h.uintTob32(1000 + i), 0, h.uintTob32(10))
 
       await oracle.connect(bigWallet).addStakingRewards(h.toWei("1"))
       await h.advanceTime(86400/2)
@@ -407,10 +407,6 @@ describe("Forking Tests - Before Transition", function() {
     assert(stakingRewardsBalance < 4000, "stakingRewardsBalance should be 0")
     assert(timeBasedRewardsBalance == 0, "timeBasedRewardsBalance should be 0")
     assert(oracleTokenPoolsSum == oracleBalance, "oracleTokenPoolsSum should be equal to oracleBalance")
-    
-
-
-
 
     for (let i = 1; i <= 10; i++) {
       await oracle.connect(accounts[i]).depositStake(h.toWei("200"))
@@ -419,16 +415,16 @@ describe("Forking Tests - Before Transition", function() {
     for (i = 0; i<5; i++) {
       await tellor.connect(bigWallet).transfer(oracle.address, h.toWei("1")) // tb rewards
 
-      await oracle.connect(accounts[1]).submitValue(h.uintTob32(1), h.uintTob32(100 + i), 0, '0x')
-      await oracle.connect(accounts[2]).submitValue(h.uintTob32(2), h.uintTob32(200 + i), 0, '0x')
-      await oracle.connect(accounts[3]).submitValue(h.uintTob32(3), h.uintTob32(300 + i), 0, '0x')
-      await oracle.connect(accounts[4]).submitValue(h.uintTob32(4), h.uintTob32(400 + i), 0, '0x')
-      await oracle.connect(accounts[5]).submitValue(h.uintTob32(5), h.uintTob32(500 + i), 0, '0x')
-      await oracle.connect(accounts[6]).submitValue(h.uintTob32(6), h.uintTob32(600 + i), 0, '0x')
-      await oracle.connect(accounts[7]).submitValue(h.uintTob32(7), h.uintTob32(700 + i), 0, '0x')
-      await oracle.connect(accounts[8]).submitValue(h.uintTob32(8), h.uintTob32(800 + i), 0, '0x')
-      await oracle.connect(accounts[9]).submitValue(h.uintTob32(9), h.uintTob32(900 + i), 0, '0x')
-      await oracle.connect(accounts[10]).submitValue(h.uintTob32(10), h.uintTob32(1000 + i), 0, '0x')
+      await oracle.connect(accounts[1]).submitValue(keccak256(h.uintTob32(1)), h.uintTob32(100 + i), 0, h.uintTob32(1))
+      await oracle.connect(accounts[2]).submitValue(keccak256(h.uintTob32(2)), h.uintTob32(200 + i), 0, h.uintTob32(2))
+      await oracle.connect(accounts[3]).submitValue(keccak256(h.uintTob32(3)), h.uintTob32(300 + i), 0, h.uintTob32(3))
+      await oracle.connect(accounts[4]).submitValue(keccak256(h.uintTob32(4)), h.uintTob32(400 + i), 0, h.uintTob32(4))
+      await oracle.connect(accounts[5]).submitValue(keccak256(h.uintTob32(5)), h.uintTob32(500 + i), 0, h.uintTob32(5))
+      await oracle.connect(accounts[6]).submitValue(keccak256(h.uintTob32(6)), h.uintTob32(600 + i), 0, h.uintTob32(6))
+      await oracle.connect(accounts[7]).submitValue(keccak256(h.uintTob32(7)), h.uintTob32(700 + i), 0, h.uintTob32(7))
+      await oracle.connect(accounts[8]).submitValue(keccak256(h.uintTob32(8)), h.uintTob32(800 + i), 0, h.uintTob32(8))
+      await oracle.connect(accounts[9]).submitValue(keccak256(h.uintTob32(9)), h.uintTob32(900 + i), 0, h.uintTob32(9))
+      await oracle.connect(accounts[10]).submitValue(keccak256(h.uintTob32(10)), h.uintTob32(1000 + i), 0, h.uintTob32(10))
 
       await oracle.connect(bigWallet).addStakingRewards(h.toWei("1"))
       await h.advanceTime(86400/2)
@@ -480,16 +476,16 @@ describe("Forking Tests - Before Transition", function() {
     for (i = 0; i<5; i++) {
       await tellor.connect(bigWallet).transfer(oracle.address, h.toWei("1")) // tb rewards
 
-      await oracle.connect(accounts[1]).submitValue(h.uintTob32(1), h.uintTob32(100 + i), 0, '0x')
-      await oracle.connect(accounts[2]).submitValue(h.uintTob32(2), h.uintTob32(200 + i), 0, '0x')
-      await oracle.connect(accounts[3]).submitValue(h.uintTob32(3), h.uintTob32(300 + i), 0, '0x')
-      await oracle.connect(accounts[4]).submitValue(h.uintTob32(4), h.uintTob32(400 + i), 0, '0x')
-      await oracle.connect(accounts[5]).submitValue(h.uintTob32(5), h.uintTob32(500 + i), 0, '0x')
-      await oracle.connect(accounts[6]).submitValue(h.uintTob32(6), h.uintTob32(600 + i), 0, '0x')
-      await oracle.connect(accounts[7]).submitValue(h.uintTob32(7), h.uintTob32(700 + i), 0, '0x')
-      await oracle.connect(accounts[8]).submitValue(h.uintTob32(8), h.uintTob32(800 + i), 0, '0x')
-      await oracle.connect(accounts[9]).submitValue(h.uintTob32(9), h.uintTob32(900 + i), 0, '0x')
-      await oracle.connect(accounts[10]).submitValue(h.uintTob32(10), h.uintTob32(1000 + i), 0, '0x')
+      await oracle.connect(accounts[1]).submitValue(keccak256(h.uintTob32(1)), h.uintTob32(100 + i), 0, h.uintTob32(1))
+      await oracle.connect(accounts[2]).submitValue(keccak256(h.uintTob32(2)), h.uintTob32(200 + i), 0, h.uintTob32(2))
+      await oracle.connect(accounts[3]).submitValue(keccak256(h.uintTob32(3)), h.uintTob32(300 + i), 0, h.uintTob32(3))
+      await oracle.connect(accounts[4]).submitValue(keccak256(h.uintTob32(4)), h.uintTob32(400 + i), 0, h.uintTob32(4))
+      await oracle.connect(accounts[5]).submitValue(keccak256(h.uintTob32(5)), h.uintTob32(500 + i), 0, h.uintTob32(5))
+      await oracle.connect(accounts[6]).submitValue(keccak256(h.uintTob32(6)), h.uintTob32(600 + i), 0, h.uintTob32(6))
+      await oracle.connect(accounts[7]).submitValue(keccak256(h.uintTob32(7)), h.uintTob32(700 + i), 0, h.uintTob32(7))
+      await oracle.connect(accounts[8]).submitValue(keccak256(h.uintTob32(8)), h.uintTob32(800 + i), 0, h.uintTob32(8))
+      await oracle.connect(accounts[9]).submitValue(keccak256(h.uintTob32(9)), h.uintTob32(900 + i), 0, h.uintTob32(9))
+      await oracle.connect(accounts[10]).submitValue(keccak256(h.uintTob32(10)), h.uintTob32(1000 + i), 0, h.uintTob32(10))
 
       await oracle.connect(bigWallet).addStakingRewards(h.toWei("1"))
       await h.advanceTime(86400/2)
