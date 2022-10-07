@@ -6,22 +6,19 @@ require("@nomiclabs/hardhat-waffle");
 require("dotenv").config();
 const web3 = require('web3');
 
-// npx hardhat run scripts/deploy.js --network rinkeby
+// npx hardhat run scripts/deploy-nonMainnet.js --network mumbai
 
 // tellor flex arguments
 var tokenAddress = '0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0';
 var reportingLock = 3600 * 12; // 12 hours
-var stakeAmountDollarTarget = web3.utils.toWei("2500");
+var stakeAmountDollarTarget = web3.utils.toWei("150");
 var stakingTokenPrice = web3.utils.toWei("16");
 var stakingTokenPriceQueryId = '0x5c13cd9c97dbb98f2429c101a2a8150e6c7a0ddaff6124ee176a3a411067ded0'
-var minimumStakeAmount = web3.utils.toWei("100");
+var minimumStakeAmount = web3.utils.toWei("10");
 
 // governance arguments
 // tellorOracleAddress
 var teamMultisigAddress = '0x2F51C4Bf6B66634187214A695be6CDd344d4e9d1' // rinkeby
-
-// tellor360 arguments
-// tellorOracleAddress
 
 // query data storage arguments
 // none
@@ -86,28 +83,6 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
         console.log("Please add network explorer details")
     }
 
-
-
-    //////////////// Tellor360
-    console.log("Starting deployment for tellor360 contract...")
-    const tellor360fac = await ethers.getContractFactory("tellor360/contracts/Tellor360.sol:Tellor360", wallet)
-    const tellor360 = await tellor360fac.deploy(flex.address) // tellor oracle address
-    console.log("Tellor360 contract deployed to: ", tellor360.address)
-
-    await tellor360.deployed()
-
-    if (net == "mainnet") {
-        console.log("Governance contract deployed to:", "https://etherscan.io/address/" + tellor360.address);
-        console.log("   Tellor360 transaction hash:", "https://etherscan.io/tx/" + tellor360.deployTransaction.hash);
-    } else if (net == "rinkeby") {
-        console.log("Tellor360 contract deployed to:", "https://rinkeby.etherscan.io/address/" + tellor360.address);
-        console.log("    Tellor360 transaction hash:", "https://rinkeby.etherscan.io/tx/" + tellor360.deployTransaction.hash);
-    } else {
-        console.log("Please add network explorer details")
-    }
-
-    
-
     ///////////// QueryDataStorage
     console.log("Starting deployment for QueryDataStorage contract...")
     const qstoragefac = await ethers.getContractFactory("autopay/contracts/QueryDataStorage.sol:QueryDataStorage", wallet)
@@ -157,20 +132,6 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
 
 
     //////////////// Verify contracts
-
-        // Wait for few confirmed transactions.
-    // Otherwise the etherscan api doesn't find the deployed contract.
-    console.log('waiting for tellor360 tx confirmation...');
-    await tellor360.deployTransaction.wait(7)
-
-    console.log('submitting contract for verification...');
-    await run("verify:verify",
-        {
-            address: tellor360.address,
-            constructorArguments: [flex.address]
-        },
-    )
-    console.log("Tellor360 contract verified")
 
     // Wait for few confirmed transactions.
     // Otherwise the etherscan api doesn't find the deployed contract.

@@ -50,11 +50,17 @@ module.exports = {
       //   gas: 10000000 ,
       //   gasPrice: 50000000000
       // }
+      mumbai: {
+        url: `${process.env.NODE_URL_MUMBAI}`,
+        seeds: [process.env.PRIVATE_KEY],
+        gas: 10000000 ,
+        gasPrice: 50000000000
+   } 
   },
   etherscan: {
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
-    apiKey: process.env.ETHERSCAN
+    apiKey: process.env.POLYGONSCAN
   },
 
   contractSizer: {
