@@ -55,13 +55,15 @@ module.exports = {
         accounts: [process.env.TESTNET_PK],
         gas: 5000000 ,
         gasPrice: 50000000000
-      }
-    // polygon: {
-    //   url: `${process.env.NODE_URL_MATIC}`,
-    //   seeds: [process.env.PRIVATE_KEY],
-    //   gas: 2000000 ,
-    //   gasPrice: 250000000000
-    // }
+      },
+    polygon: {
+      url: `${process.env.NODE_URL_MATIC}`,
+      accounts: [process.env.PRIVATE_KEY],
+      gasLimit: 4000000 ,
+      gasPrice: 50000000000 //,
+      //maxPriorityFeePerGas: ,
+      //maxFeePerGas: 
+    }
 
   },
   etherscan: {
