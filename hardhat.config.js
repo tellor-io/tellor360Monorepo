@@ -49,12 +49,28 @@ module.exports = {
       //   accounts: [process.env.PRIVATE_KEY],
       //   gas: 10000000 ,
       //   gasPrice: 50000000000
-      // }
+      // },
+   mumbai: {
+        url: `${process.env.NODE_URL_MUMBAI}`,
+        accounts: [process.env.TESTNET_PK],
+        gas: 5000000 ,
+        gasPrice: 50000000000
+      },
+    polygon: {
+      url: `${process.env.NODE_URL_MATIC}`,
+      accounts: [process.env.PRIVATE_KEY],
+      gasLimit: 4000000 ,
+      gasPrice: 50000000000 //,
+      //maxPriorityFeePerGas: ,
+      //maxFeePerGas: 
+    }
+
   },
   etherscan: {
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
-    apiKey: process.env.ETHERSCAN
+    //apiKey: process.env.ETHERSCAN
+    apiKey: process.env.POLYSCAN
   },
 
   contractSizer: {
