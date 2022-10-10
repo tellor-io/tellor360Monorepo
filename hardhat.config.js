@@ -59,8 +59,9 @@ module.exports = {
     polygon: {
       url: `${process.env.NODE_URL_MATIC}`,
       accounts: [process.env.PRIVATE_KEY],
-      gasLimit: 4000000 ,
-      gasPrice: 50000000000 //,
+      gas: 5000000 ,
+      gasPrice: 1
+ 
       //maxPriorityFeePerGas: ,
       //maxFeePerGas: 
     }
