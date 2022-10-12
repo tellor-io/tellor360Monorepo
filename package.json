@@ -19,13 +19,13 @@
     "hardhat-gas-reporter": "^1.0.8"
   },
   "dependencies": {
-    "autopay": "github:tellor-io/autoPay#360",
+    "autopay": "github:tellor-io/autoPay",
     "dotenv": "^16.0.2",
-    "polygongovernance": "github:tellor-io/governance#360",
+    "polygongovernance": "github:tellor-io/governance",
     "solidity-coverage": "^0.7.21",
     "tellor360": "github:tellor-io/tellor360",
-    "tellorflex": "github:tellor-io/tellorFlex#360",
-    "usingtellor": "github:tellor-io/usingtellor#360",
+    "tellorflex": "github:tellor-io/tellorFlex",
+    "usingtellor": "github:tellor-io/usingtellor",
     "web3": "^1.7.5"
   }
 }
