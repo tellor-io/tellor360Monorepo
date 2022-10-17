@@ -10,20 +10,22 @@ const web3 = require('web3');
 
 // tellor flex arguments
 //var tokenAddress = '0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0';//rinkeby and ethereum mainnet
-var tokenAddress = '0xce4e32fe9d894f8185271aa990d2db425df3e6be';//mumbai
+//var tokenAddress = '0xce4e32fe9d894f8185271aa990d2db425df3e6be';//mumbai
 //var tokenAddress = '0xE3322702BEdaaEd36CdDAb233360B939775ae5f1';//polygon
+var tokenAddress = '0x51c59c6cAd28ce3693977F2feB4CfAebec30d8a2';//for goerli it will be the Master address
 
 var reportingLock = 3600 * 12; // 12 hours
-var stakeAmountDollarTarget = web3.utils.toWei("150");
+var stakeAmountDollarTarget = web3.utils.toWei("1500");
 var stakingTokenPrice = web3.utils.toWei("15");
-var minTRBstakeAmount = web3.utils.toWei("10")
+var minTRBstakeAmount = web3.utils.toWei("100")
 var stakingTokenPriceQueryId = '0x5c13cd9c97dbb98f2429c101a2a8150e6c7a0ddaff6124ee176a3a411067ded0'
 
 // governance arguments
 // tellorOracleAddress
 //var teamMultisigAddress = '0x2F51C4Bf6B66634187214A695be6CDd344d4e9d1' // rinkeby
-var teamMultisigAddress = '0x80fc34a2f9FfE86F41580F47368289C402DEc660'//mumbai
+//var teamMultisigAddress = '0x80fc34a2f9FfE86F41580F47368289C402DEc660'//mumbai
 //var teamMultisigAddress = '0x3F0C1eB3FA7fCe2b0932d6d4D9E03b5481F3f0A7'//polygon
+var teamMultisigAddress = '0x4A1099d4897fFcc8eC7cb014B1a7442B28C7940C'//goerli
 
 // tellor360 arguments
 // tellorOracleAddress
@@ -241,7 +243,7 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
 }
 
 
-deployTellor360("mumbai", process.env.TESTNET_PK, process.env.NODE_URL_MUMBAI, tokenAddress, reportingLock, stakeAmountDollarTarget, stakingTokenPrice, minTRBstakeAmount,stakingTokenPriceQueryId, teamMultisigAddress, autopayFee)
+deployTellor360("goerli", process.env.TESTNET_PK, process.env.NODE_URL_GOERLI, tokenAddress, reportingLock, stakeAmountDollarTarget, stakingTokenPrice, minTRBstakeAmount,stakingTokenPriceQueryId, teamMultisigAddress, autopayFee)
     .then(() => process.exit(0))
     .catch(error => {
         console.error(error);
