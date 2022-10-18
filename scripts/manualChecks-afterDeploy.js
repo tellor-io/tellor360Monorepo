@@ -8,21 +8,21 @@ const { ethers } = require("hardhat");
 const web3 = require("web3");
 const h = require("../test/helpers/helpers");
 
-// npx hardhat run scripts/manualChecks-afterDeploy.js --network rinkeby
+// npx hardhat run scripts/manualChecks-afterDeploy.js --network goerli
 
 // Update these values with newly deployed addresses
-const flexAddress = "0x943fDA606fA75c2E8918b72A4cF92b68040a1671";
-const govAddress = "0x5b58A793334aa4443775573ae6d47A931b5bde70";
-const autopayAddress = "0x2D3d3842F5cF39411317f1E28F042fcE409db4B9";
-const tellor360Address = "0xb4c938f5A5Db52Cf4A4B55d3439aAbc0944BCD63"; // newly deployed tellor360 address
-const queryDataStorageAddress = "0xb31BEb76c906cf8655F94b165759E5807c759aA5";
+const flexAddress = "0x873DAEd52B52b826C000713de3DCdB77641F7756";
+const govAddress = "0x199839a4907ABeC8240D119B606C98c405Bb0B33";
+const autopayAddress = "0x7E7b96d13D75bc7DaF270A491e2f1e571147d4DA";
+const tellor360Address = "0x8C9057FA16D3Debb703ADBac0A097d2E5577AA6b"; // newly deployed tellor360 address
+const queryDataStorageAddress = "0x49eE5818fcA3016728827ba473c44f9024A6EC88";
 
 // update these values on case by case basis
-const tokenAddress = "0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0";
-const masterAddress = "0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0";
-const stakeAmountDollarTarget = web3.utils.toWei("2500");
-const stakingTokenPrice = web3.utils.toWei("16");
-const teamMultisigAddress = "0x2F51C4Bf6B66634187214A695be6CDd344d4e9d1"; // rinkeby
+const tokenAddress = "0x51c59c6cAd28ce3693977F2feB4CfAebec30d8a2";
+const masterAddress = "0x51c59c6cAd28ce3693977F2feB4CfAebec30d8a2";
+const stakeAmountDollarTarget = web3.utils.toWei("1500");
+const stakingTokenPrice = web3.utils.toWei("15");
+const teamMultisigAddress = "0x4A1099d4897fFcc8eC7cb014B1a7442B28C7940C"; // rinkeby
 
 // Don't change these
 const reportingLock = 3600 * 12; // 12 hours
@@ -245,7 +245,7 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-manualChecks("rinkeby", process.env.TESTNET_PK, process.env.NODE_URL_RINKEBY)
+manualChecks("goerli", process.env.TESTNET_PK, process.env.NODE_URL_GOERLI)
   .then(() => process.exit(0))
   .catch((error) => {
     console.error(error);
