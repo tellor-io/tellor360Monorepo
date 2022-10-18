@@ -25,7 +25,7 @@
     "solidity-coverage": "^0.7.21",
     "tellor360": "github:tellor-io/tellor360",
     "tellorflex": "github:tellor-io/tellorFlex",
-    "usingtellor": "github:tellor-io/usingtellor",
+    "usingtellor": "^5.0.0",
     "web3": "^1.7.5"
   }
 }
