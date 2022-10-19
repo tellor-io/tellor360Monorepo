@@ -48,7 +48,7 @@ describe("Forking Tests - Before Transition", function() {
       method: "hardhat_reset",
       params: [{forking: {
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 7791300 // set block number to right after 1 TRB reward added
+            blockNumber: 7786210 // set block number to right after 1 TRB reward added
           },},],
       });
 
