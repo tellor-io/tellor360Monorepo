@@ -8,11 +8,11 @@ const { keccak256 } = require("ethers/lib/utils");
 describe("Forking Tests - Before Transition", function() {
 
   // tellor360 - update these
-  const ORACLE360 = "0x873DAEd52B52b826C000713de3DCdB77641F7756"
-  const GOVERNANCE360 = "0x199839a4907ABeC8240D119B606C98c405Bb0B33"
-  const AUTOPAY360 = "0x7E7b96d13D75bc7DaF270A491e2f1e571147d4DA"
-  const TELLOR360 = "0x8C9057FA16D3Debb703ADBac0A097d2E5577AA6b"
-  const QUERY_DATA_STORAGE = "0x49eE5818fcA3016728827ba473c44f9024A6EC88"
+ const ORACLE360 = "0xB3B662644F8d3138df63D2F43068ea621e2981f9"
+ const GOVERNANCE360 = "0x02803dcFD7Cb32E97320CFe7449BFb45b6C931b8"
+ const AUTOPAY360 = "0x1F033Cb8A2Df08a147BC512723fd0da3FEc5cCA7"
+ const TELLOR360 = "0xD3b9A1DCAbd16c482785Fd4265cB4580B84cdeD7"
+ const QUERY_DATA_STORAGE = "0xA33ca1062762c8591E29E65bf7aC7ae8EC88b183"
 
   // rinkeby pre360 addresses
   const tellorMaster = "0x51c59c6cAd28ce3693977F2feB4CfAebec30d8a2"
@@ -48,7 +48,7 @@ describe("Forking Tests - Before Transition", function() {
       method: "hardhat_reset",
       params: [{forking: {
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 7786210 // set block number to right after 1 TRB reward added
+            blockNumber: 7798105  // set block number to right after 1 TRB reward added
           },},],
       });
 

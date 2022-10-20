@@ -11,11 +11,11 @@ const h = require("../test/helpers/helpers");
 // npx hardhat run scripts/manualChecks-afterDeploy.js --network goerli
 
 // Update these values with newly deployed addresses
-const flexAddress = "0x873DAEd52B52b826C000713de3DCdB77641F7756";
-const govAddress = "0x199839a4907ABeC8240D119B606C98c405Bb0B33";
-const autopayAddress = "0x7E7b96d13D75bc7DaF270A491e2f1e571147d4DA";
-const tellor360Address = "0x8C9057FA16D3Debb703ADBac0A097d2E5577AA6b"; // newly deployed tellor360 address
-const queryDataStorageAddress = "0x49eE5818fcA3016728827ba473c44f9024A6EC88";
+const flexAddress = "0xB3B662644F8d3138df63D2F43068ea621e2981f9";
+const govAddress = "0x02803dcFD7Cb32E97320CFe7449BFb45b6C931b8";
+const autopayAddress = "0x1F033Cb8A2Df08a147BC512723fd0da3FEc5cCA7";
+const tellor360Address = "0xD3b9A1DCAbd16c482785Fd4265cB4580B84cdeD7"; // newly deployed tellor360 address
+const queryDataStorageAddress = "0xA33ca1062762c8591E29E65bf7aC7ae8EC88b183";
 
 // update these values on case by case basis
 const tokenAddress = "0x51c59c6cAd28ce3693977F2feB4CfAebec30d8a2";
