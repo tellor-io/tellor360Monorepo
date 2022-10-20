@@ -7,20 +7,20 @@ const { keccak256 } = require("ethers/lib/utils");
 
 describe("Forking Tests - After Transition", function() {
 
-  // tellor360 - update these
-  const ORACLE360 = "0x943fDA606fA75c2E8918b72A4cF92b68040a1671"
-  const GOVERNANCE360 = "0x5b58A793334aa4443775573ae6d47A931b5bde70"
-  const AUTOPAY360 = "0x2D3d3842F5cF39411317f1E28F042fcE409db4B9"
-  const TELLOR360 = "0xb4c938f5A5Db52Cf4A4B55d3439aAbc0944BCD63"
-  const QUERY_DATA_STORAGE = "0xb31BEb76c906cf8655F94b165759E5807c759aA5"
+ // tellor360 - update these
+ const ORACLE360 = "0xB3B662644F8d3138df63D2F43068ea621e2981f9"
+ const GOVERNANCE360 = "0x02803dcFD7Cb32E97320CFe7449BFb45b6C931b8"
+ const AUTOPAY360 = "0x1F033Cb8A2Df08a147BC512723fd0da3FEc5cCA7"
+ const TELLOR360 = "0xD3b9A1DCAbd16c482785Fd4265cB4580B84cdeD7"
+ const QUERY_DATA_STORAGE = "0xA33ca1062762c8591E29E65bf7aC7ae8EC88b183"
 
-  // rinkeby pre360 addresses
-  const tellorMaster = "0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0"
-  const DEV_WALLET = "0x2F51C4Bf6B66634187214A695be6CDd344d4e9d1"
-  const BIGWALLET = "0x41c5a04f61b865e084e5f502ff322ad624cad609"
-  const CURR_GOV = "0xA64Bb0078eB80c97484f3f09Adb47b9B73CBcA00"
-  const REPORTER = "0x0D4F81320d36d7B7Cf5fE7d1D547f63EcBD1a3E0"
-  const TELLORX_ORACLE = "0x18431fd88adF138e8b979A7246eb58EA7126ea16"
+ // rinkeby pre360 addresses
+ const tellorMaster = "0x51c59c6cAd28ce3693977F2feB4CfAebec30d8a2"
+ const DEV_WALLET = "0x4A1099d4897fFcc8eC7cb014B1a7442B28C7940C"
+ const BIGWALLET = "0x41C5a04F61b865e084E5F502ff322aD624CaD609"
+ const CURR_GOV = "0x45B24bd85261210e1354d203682C7127cc3D44E6"
+ const REPORTER = "0x0D4F81320d36d7B7Cf5fE7d1D547f63EcBD1a3E0"
+ const TELLORX_ORACLE = "0x6732b279E7C975B39DfFedA7173e4E426aA9a40F"
   
   const abiCoder = new ethers.utils.AbiCoder();
   const AUTOPAY_QUERY_DATA_ARGS = abiCoder.encode(["bytes"], ["0x"])
@@ -50,7 +50,7 @@ describe("Forking Tests - After Transition", function() {
       method: "hardhat_reset",
       params: [{forking: {
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 11459700
+            blockNumber: 7798105
           },},],
       });
 
@@ -91,6 +91,16 @@ describe("Forking Tests - After Transition", function() {
     usingTellorUser = await UsingTellorUser.deploy(oracle.address)
     await usingTellorUser.deployed()
 
+    // fund accounts with sufficient ether for testing
+    const transactionHash = await accounts[10].sendTransaction({
+      to: BIGWALLET,
+      value: ethers.utils.parseEther("10.0"), 
+    });
+    await accounts[10].sendTransaction({
+      to: DEV_WALLET,
+      value: ethers.utils.parseEther("10.0"), 
+    });
+
     // stake and submit eth/usd price to new flex
     await tellor.connect(bigWallet).approve(oracle.address, h.toWei("1001"))
     await oracle.connect(bigWallet).depositStake(h.toWei("1000"))
@@ -103,12 +113,13 @@ describe("Forking Tests - After Transition", function() {
 
 
     // upgrade to 360
-    await oldGovernance.connect(bigWallet).vote(19, true, false)
-    await oldGovernance.connect(devWallet).vote(19, true, false)
+    await tellor.connect(bigWallet).approve(oldGovernance.address, h.toWei("100"))
+    await oldGovernance.connect(bigWallet).proposeVote(tellor.address, '0x3c46a185', '0x0000000000000000000000008c9057fa16d3debb703adbac0a097d2e5577aa6b', 0)
+    await oldGovernance.connect(bigWallet).vote(3, true, false)
     await h.advanceTime(86400*7)
-    await oldGovernance.tallyVotes(19)
+    await oldGovernance.tallyVotes(3)
     await h.advanceTime(86400*2)
-    await oldGovernance.executeVote(19)
+    await oldGovernance.executeVote(3)
     await tellor.init()
   });
 
@@ -260,18 +271,25 @@ describe("Forking Tests - After Transition", function() {
 
   it("report trb/usd and update stake amount", async function() {
     await tellor.connect(bigWallet).transfer(accounts[1].address, h.toWei("1000"))
-    await tellor.connect(bigWallet).transfer(accounts[2].address, h.toWei("1000"))
     await tellor.connect(accounts[1]).approve(oracle.address, h.toWei("1000"))
-    await tellor.connect(accounts[2]).approve(governance.address, h.toWei("1000"))
     await oracle.connect(accounts[1]).depositStake(h.toWei("1000"))
 
-    // report trb/usd price
-    await oracle.connect(accounts[1]).submitValue(TRB_QUERY_ID, h.uintTob32(h.toWei("2500")), 0, TRB_QUERY_DATA)
+    // report trb/usd price below inflection price
+    await oracle.connect(accounts[1]).submitValue(TRB_QUERY_ID, h.uintTob32(h.toWei("7.5")), 0, TRB_QUERY_DATA)
     await h.advanceTime(86400/2) 
+
 
     // update stake amount
     await oracle.connect(accounts[1]).updateStakeAmount()
-    assert(await oracle.stakeAmount() == h.toWei("1"), "stake amount not updated correctly")
+    assert(await oracle.stakeAmount() == h.toWei("200"), "stake amount not updated correctly")
+
+    // report trb/usd price above inflection price
+    await oracle.connect(accounts[1]).submitValue(TRB_QUERY_ID, h.uintTob32(h.toWei("30")), 0, TRB_QUERY_DATA)
+    await h.advanceTime(86400/2)
+
+    // update stake amount
+    await oracle.connect(accounts[1]).updateStakeAmount()
+    assert(await oracle.stakeAmount() == h.toWei("100"), "stake amount not updated correctly")
   })
 
   it("rewards go to zero, big reward added, 2 stakers stakes", async function() {
@@ -279,13 +297,21 @@ describe("Forking Tests - After Transition", function() {
     await tellor.connect(bigWallet).transfer(accounts[1].address, h.toWei("100"))
     await tellor.connect(bigWallet).transfer(accounts[2].address, h.toWei("100"))
     await tellor.connect(bigWallet).transfer(accounts[3].address, h.toWei("100"))
+    await tellor.connect(bigWallet).transfer(accounts[4].address, h.toWei("1"))
     await tellor.connect(bigWallet).transfer(accounts[10].address, h.toWei("6000"))
     await tellor.connect(accounts[1]).approve(oracle.address, h.toWei("1000000"))
     await tellor.connect(accounts[2]).approve(oracle.address, h.toWei("100"))
     await tellor.connect(accounts[3]).approve(oracle.address, h.toWei("100"))
+    await tellor.connect(accounts[4]).approve(oracle.address, h.toWei("1"))
     await tellor.connect(accounts[10]).approve(oracle.address, h.toWei("100000"))
 
+    // // reset staking rewards balance
+    // await oracle.connect(accounts[4]).depositStake(h.toWei("1"))
+    // await h.advanceTime(86400 * 31)
+    // await oracle.connect(accounts[4]).requestStakingWithdraw(h.toWei("1"))
+
     stakingRewardsBalance = await oracle.stakingRewardsBalance()
+    console.log("stakingRewardsBalance: ", stakingRewardsBalance.toString())
     assert(stakingRewardsBalance == h.toWei("1"), "stakingRewardsBalance should start at 1 TRB")
     await oracle.connect(accounts[10]).addStakingRewards(h.toWei("1000"))
     stakingRewardsBalance = await oracle.stakingRewardsBalance()
@@ -692,6 +718,20 @@ describe("Forking Tests - After Transition", function() {
     oracleBalance = await tellor.balanceOf(oracle.address)
     expectedBalance = BigInt(h.toWei("146.94")) * BigInt(7 * 12 * 86400 + 1) / BigInt(86400) + BigInt(h.toWei("1")) // + (BigInt(h.toWei("146.94")) / BigInt(86400))
     assert(oracleBalance == expectedBalance, "oracleBalance should be correct")
+  })
+
+  it("mint dev share", async function() {
+    await tellor.mintToTeam()
+    blocky1 = await h.getBlock() 
+    teamBal1 = await tellor.balanceOf(DEV_WALLET)
+    await h.advanceTime(86400 * 30)
+    await tellor.mintToTeam()
+    blocky2 = await h.getBlock()
+    teamBal2 = await tellor.balanceOf(DEV_WALLET)
+
+    expectedDiff = BigInt(h.toWei("146.94")) * BigInt(blocky2.timestamp - blocky1.timestamp) / BigInt(86400)
+
+    assert(BigInt(teamBal2) - BigInt(teamBal1) == expectedDiff, "dev share not minted correctly")
   })
 })
 

@@ -33,7 +33,7 @@ module.exports = {
       //   count: 40,
       // },
       forking: {
-        url: "https://eth-rinkeby.alchemyapi.io/v2/I-BlqR7R6s5-Skel3lnCwJzamDbmXHLF",
+        url: "https://eth-goerli.alchemyapi.io/v2/I-BlqR7R6s5-Skel3lnCwJzamDbmXHLF",
         // blockNumber:  // rinkeby
       },
       allowUnlimitedContractSize: true
