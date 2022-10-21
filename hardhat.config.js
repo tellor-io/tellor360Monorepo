@@ -38,12 +38,12 @@ module.exports = {
       },
       allowUnlimitedContractSize: true
     },
-    goerli: {
-      url: `${process.env.NODE_URL_GOERLI}`,
-      accounts: [process.env.TESTNET_PK],
-      gas: 10000000 ,
-      gasPrice: 5000000000
-    },
+    // goerli: {
+    //   url: `${process.env.NODE_URL_GOERLI}`,
+    //   accounts: [process.env.TESTNET_PK],
+    //   gas: 10000000 ,
+    //   gasPrice: 5000000000
+    // },
       // mainnet: {
       //   url: `${process.env.NODE_URL_MAINNET}`,
       //   accounts: [process.env.PRIVATE_KEY],
@@ -60,7 +60,7 @@ module.exports = {
       url: `${process.env.NODE_URL_MATIC}`,
       accounts: [process.env.PRIVATE_KEY],
       gas: 5000000 ,
-      gasPrice: 1
+      gasPrice: 250000000000
  
       //maxPriorityFeePerGas: ,
       //maxFeePerGas: 
@@ -70,8 +70,8 @@ module.exports = {
   etherscan: {
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
-    apiKey: process.env.ETHERSCAN
-    //apiKey: process.env.POLYSCAN
+    //apiKey: process.env.ETHERSCAN
+    apiKey: process.env.POLYSCAN
   },
 
   contractSizer: {

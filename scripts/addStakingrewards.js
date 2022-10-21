@@ -8,8 +8,9 @@ const web3 = require('web3');
 
 // npx hardhat run scripts/addStakingRewards.js --network goerli
 
-var TellorMaster = '0x51c59c6cAd28ce3693977F2feB4CfAebec30d8a2';//for goerli it will be the Master address
-var TellorFlex = '0x873DAEd52B52b826C000713de3DCdB77641F7756'
+//Goerli
+var TellorMaster = '0x51c59c6cAd28ce3693977F2feB4CfAebec30d8a2'//for goerli it will be the Master address
+var TellorFlex = '0xB3B662644F8d3138df63D2F43068ea621e2981f9'//goerli flex
 
 
 async function deployTellor360(_network, _pk, _nodeURL) {
