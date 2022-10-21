@@ -52,7 +52,7 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     console.log("Starting deployment for flex contract...")
     // const flexfac = await ethers.getContractFactory("contracts/tellor3/Extension.sol:Extension", wallet)
     const flexfac = await ethers.getContractFactory("tellorflex/contracts/TellorFlex.sol:TellorFlex", wallet)
-    const flex = await flexfac.deploy(_tokenAddress, _reportingLock, _stakeAmountDollarTarget, _stakingTokenPrice, _minTokenstakeAmount,_stakingTokenPriceQueryId)
+    const flex = await flexfac.deploy(_tokenAddress, _reportingLock, _stakeAmountDollarTarget, _stakingTokenPrice, _minTokenstakeAmount,_stakingTokenPriceQueryId, { gasPrice:100000000000 })
     console.log("TellorFlex contract deployed to: ", flex.address)
 
     await flex.deployed()
@@ -72,7 +72,7 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     //////////////// Governance
     console.log("Starting deployment for governance contract...")
     const govfac = await ethers.getContractFactory("polygongovernance/contracts/Governance.sol:Governance", wallet)
-    const governance = await govfac.deploy(flex.address, _teamMultisigAddress)
+    const governance = await govfac.deploy(flex.address, _teamMultisigAddress, { gasPrice:100000000000})
     console.log("Governance contract deployed to: ", governance.address)
 
     await governance.deployed()
@@ -94,7 +94,7 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     ///////////// QueryDataStorage
     console.log("Starting deployment for QueryDataStorage contract...")
     const qstoragefac = await ethers.getContractFactory("autopay/contracts/QueryDataStorage.sol:QueryDataStorage", wallet)
-    const qstorage = await qstoragefac.deploy()
+    const qstorage = await qstoragefac.deploy({ gasPrice:100000000000 })
     console.log("QueryDataStorage contract deployed to: ", qstorage.address)
 
     await qstorage.deployed();
@@ -114,7 +114,7 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     //////////////// Autopay
     console.log("Starting deployment for Autopay contract...")
     const autopayfac = await ethers.getContractFactory("autopay/contracts/Autopay.sol:Autopay", wallet)
-    const autopay = await autopayfac.deploy(flex.address, qstorage.address, _autopayFee) // tellorOracleAddress, queryDataStorageAddress, autopayFee
+    const autopay = await autopayfac.deploy(flex.address, qstorage.address, _autopayFee, { gasPrice:100000000000 }) // tellorOracleAddress, queryDataStorageAddress, autopayFee
     console.log("Autopay contract deployed to: ", autopay.address)
 
     await autopay.deployed()
@@ -201,13 +201,13 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
 
       // init flex
       console.log('initializing flex...');
-      await flex.init(governance.address)
+      await flex.init(governance.address, { gasPrice:100000000000 })
       console.log('flex initialized');
 
 }
 
 
-deployTellor360("polygon", process.env.PRIVATE_KEY, process.env.NODE_URL_MATIC, tokenAddress, reportingLock, stakeAmountDollarTarget, stakingTokenPrice, minTokenstakeAmount,stakingTokenPriceQueryId, teamMultisigAddress, autopayFee)
+deployTellor360("polygon", process.env.TESTNET_PK, process.env.NODE_URL_MATIC, tokenAddress, reportingLock, stakeAmountDollarTarget, stakingTokenPrice, minTokenstakeAmount,stakingTokenPriceQueryId, teamMultisigAddress, autopayFee)
     .then(() => process.exit(0))
     .catch(error => {
         console.error(error);

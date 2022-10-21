@@ -6,18 +6,18 @@ require("@nomiclabs/hardhat-waffle");
 require("dotenv").config();
 const web3 = require('web3');
 
-// npx hardhat run scripts/deploy.js --network rinkeby
+// npx hardhat run scripts/deploy.js --network goerli
 
 // tellor flex arguments
 //var tokenAddress = '0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0';//rinkeby and ethereum mainnet
-//var tokenAddress = '0xce4e32fe9d894f8185271aa990d2db425df3e6be';//mumbai
+var tokenAddress = '0xce4e32fe9d894f8185271aa990d2db425df3e6be';//mumbai
 //var tokenAddress = '0xE3322702BEdaaEd36CdDAb233360B939775ae5f1';//polygon
-var tokenAddress = '0x51c59c6cAd28ce3693977F2feB4CfAebec30d8a2';//for goerli it will be the Master address
+//var tokenAddress = '0x51c59c6cAd28ce3693977F2feB4CfAebec30d8a2';//for goerli it will be the Master address
 
 var reportingLock = 3600 * 12; // 12 hours
-var stakeAmountDollarTarget = web3.utils.toWei("1500");
+var stakeAmountDollarTarget = web3.utils.toWei("150");
 var stakingTokenPrice = web3.utils.toWei("15");
-var minTRBstakeAmount = web3.utils.toWei("100")
+var minTRBstakeAmount = web3.utils.toWei("10")
 var stakingTokenPriceQueryId = '0x5c13cd9c97dbb98f2429c101a2a8150e6c7a0ddaff6124ee176a3a411067ded0'
 
 // governance arguments
@@ -134,7 +134,6 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     }
 
 
-
     //////////////// Autopay
     console.log("Starting deployment for Autopay contract...")
     const autopayfac = await ethers.getContractFactory("autopay/contracts/Autopay.sol:Autopay", wallet)
@@ -154,10 +153,26 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     }
 
 
-    
-
-
     //////////////// Verify contracts
+
+    // Wait for few confirmed transactions.
+    // Otherwise the etherscan api doesn't find the deployed contract.
+    console.log('waiting for flex tx confirmation...');
+    await flex.deployTransaction.wait(7)
+
+    // // init flex
+    // console.log('initializing flex...');
+    // await flex.init(governance.address)
+    // console.log('flex initialized');
+
+    console.log('submitting contract for verification...');
+    await run("verify:verify",
+        {
+            address: flex.address,
+            constructorArguments: [_tokenAddress, _reportingLock, _stakeAmountDollarTarget, _stakingTokenPrice,_minTRBstakeAmount, _stakingTokenPriceQueryId]
+        },
+    )
+    console.log("TellorFlex contract verified")
 
         // Wait for few confirmed transactions.
     // Otherwise the etherscan api doesn't find the deployed contract.
@@ -173,24 +188,6 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     )
     console.log("Tellor360 contract verified")
 
-    // Wait for few confirmed transactions.
-    // Otherwise the etherscan api doesn't find the deployed contract.
-    console.log('waiting for flex tx confirmation...');
-    await flex.deployTransaction.wait(7)
-
-    // init flex
-    console.log('initializing flex...');
-    await flex.init(governance.address)
-    console.log('flex initialized');
-
-    console.log('submitting contract for verification...');
-    await run("verify:verify",
-        {
-            address: flex.address,
-            constructorArguments: [_tokenAddress, _reportingLock, _stakeAmountDollarTarget, _stakingTokenPrice,_minTRBstakeAmount, _stakingTokenPriceQueryId]
-        },
-    )
-    console.log("TellorFlex contract verified")
 
         // Wait for few confirmed transactions.
     // Otherwise the etherscan api doesn't find the deployed contract.
@@ -205,9 +202,6 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
         },
     )
     console.log("autopay contract verified")
-
-
-
 
 
     // Wait for few confirmed transactions.
@@ -243,7 +237,7 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
 }
 
 
-deployTellor360("goerli", process.env.TESTNET_PK, process.env.NODE_URL_GOERLI, tokenAddress, reportingLock, stakeAmountDollarTarget, stakingTokenPrice, minTRBstakeAmount,stakingTokenPriceQueryId, teamMultisigAddress, autopayFee)
+deployTellor360("goerli", process.env.TESTNET_PK, process.env.NODE_URL_MUMBAI, tokenAddress, reportingLock, stakeAmountDollarTarget, stakingTokenPrice, minTRBstakeAmount,stakingTokenPriceQueryId, teamMultisigAddress, autopayFee)
     .then(() => process.exit(0))
     .catch(error => {
         console.error(error);
