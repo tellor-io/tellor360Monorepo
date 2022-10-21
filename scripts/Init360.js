@@ -6,7 +6,7 @@ require("@nomiclabs/hardhat-waffle");
 require("dotenv").config();
 const web3 = require('web3');
 
-// npx hardhat run scripts/addStakingRewards.js --network goerli
+// npx hardhat run scripts/Init360.js --network goerli
 
 //Goerli
 var TellorMaster = '0x51c59c6cAd28ce3693977F2feB4CfAebec30d8a2'//for goerli it will be the Master address
@@ -34,11 +34,12 @@ async function deployTellor360(_network, _pk, _nodeURL) {
     const tellor360 = await ethers.getContractAt("tellor360/contracts/Tellor360.sol:Tellor360", TellorMaster)
     console.log("Tellor360 contract deployed to: ", tellor360.address)
 
-    await tellor360.connect(wallet).init(TellorFlex, web3.utils.toWei('1'))
-    // await tellor360.connect(wallet).approve(TellorFlex, web3.utils.toWei('1'))
-    // console.log(" tellor360 approved") 
-    // await flex.connect(wallet).addStakingRewards(web3.utils.toWei('1'))
-    console.log(" tellorFlex staking reward added") 
+    await tellor360.connect(wallet).init()
+    console.log(" 360 init") 
+    await tellor360.connect(wallet).mintToOracle({ gasPrice:50000000000, gasLimit:500000 })
+    console.log(" mint to oracle")
+    await tellor360.connect(wallet).transferOutOfContract({ gasPrice:50000000000, gasLimit:500000 }) 
+    console.log(" tranfer out of contract")
     
 
 }
