@@ -5,22 +5,37 @@ const web3 = require('web3');
 const { ethers } = require("hardhat");
 const { keccak256 } = require("ethers/lib/utils");
 
-describe("Forking Tests - After Transition", function() {
+describe("Forking Tests - Simulated Upgrade", function() {
 
- // tellor360 - update these
+ // tellor360 - mainnet
  const ORACLE360 = "0xB3B662644F8d3138df63D2F43068ea621e2981f9"
  const GOVERNANCE360 = "0x02803dcFD7Cb32E97320CFe7449BFb45b6C931b8"
  const AUTOPAY360 = "0x1F033Cb8A2Df08a147BC512723fd0da3FEc5cCA7"
  const TELLOR360 = "0xD3b9A1DCAbd16c482785Fd4265cB4580B84cdeD7"
  const QUERY_DATA_STORAGE = "0xA33ca1062762c8591E29E65bf7aC7ae8EC88b183"
 
- // rinkeby pre360 addresses
+ // pre360 addresses - mainnet
+ const tellorMaster = "0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0"
+ const DEV_WALLET = "0x39e419ba25196794b595b2a595ea8e527ddc9856"
+ const BIGWALLET = "0x14Cb3184F38C293Ee26D15269345CdC128CF6694"
+ const CURR_GOV = "0x51d4088d4EeE00Ae4c55f46E0673e9997121DB00"
+ const REPORTER = "0x0D4F81320d36d7B7Cf5fE7d1D547f63EcBD1a3E0"
+ const TELLORX_ORACLE = "0xe8218cACb0a5421BC6409e498d9f8CC8869945ea"
+
+/*  // tellor360 - goerli
+ const ORACLE360 = "0xB3B662644F8d3138df63D2F43068ea621e2981f9"
+ const GOVERNANCE360 = "0x02803dcFD7Cb32E97320CFe7449BFb45b6C931b8"
+ const AUTOPAY360 = "0x1F033Cb8A2Df08a147BC512723fd0da3FEc5cCA7"
+ const TELLOR360 = "0xD3b9A1DCAbd16c482785Fd4265cB4580B84cdeD7"
+ const QUERY_DATA_STORAGE = "0xA33ca1062762c8591E29E65bf7aC7ae8EC88b183"
+
+ // pre360 addresses - goerli
  const tellorMaster = "0x51c59c6cAd28ce3693977F2feB4CfAebec30d8a2"
  const DEV_WALLET = "0x4A1099d4897fFcc8eC7cb014B1a7442B28C7940C"
  const BIGWALLET = "0x41C5a04F61b865e084E5F502ff322aD624CaD609"
  const CURR_GOV = "0x45B24bd85261210e1354d203682C7127cc3D44E6"
  const REPORTER = "0x0D4F81320d36d7B7Cf5fE7d1D547f63EcBD1a3E0"
- const TELLORX_ORACLE = "0x6732b279E7C975B39DfFedA7173e4E426aA9a40F"
+ const TELLORX_ORACLE = "0x6732b279E7C975B39DfFedA7173e4E426aA9a40F" */
   
   const abiCoder = new ethers.utils.AbiCoder();
   const AUTOPAY_QUERY_DATA_ARGS = abiCoder.encode(["bytes"], ["0x"])
@@ -50,7 +65,8 @@ describe("Forking Tests - After Transition", function() {
       method: "hardhat_reset",
       params: [{forking: {
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 7798105
+            blockNumber: 15818790 // mainnet - set block number to right after 1 TRB reward added
+            // blockNumber: 7809705 // goerli - set block number to right after 1 TRB reward added
           },},],
       });
 
@@ -111,17 +127,26 @@ describe("Forking Tests - After Transition", function() {
     await oracle.connect(bigWallet).withdrawStake()
     await oracle.connect(bigWallet).addStakingRewards(h.toWei("1"))
 
-
     // upgrade to 360
     await tellor.connect(bigWallet).approve(oldGovernance.address, h.toWei("100"))
-    await oldGovernance.connect(bigWallet).proposeVote(tellor.address, '0x3c46a185', '0x0000000000000000000000008c9057fa16d3debb703adbac0a097d2e5577aa6b', 0)
-    await oldGovernance.connect(bigWallet).vote(3, true, false)
+    await oldGovernance.connect(bigWallet).proposeVote(tellor.address, '0x3c46a185', abiCoder.encode(['address'], [tellor360.address]), 0)
+    await oldGovernance.connect(bigWallet).vote(7, true, false)
     await h.advanceTime(86400*7)
-    await oldGovernance.tallyVotes(3)
+    await oldGovernance.tallyVotes(7)
     await h.advanceTime(86400*2)
-    await oldGovernance.executeVote(3)
+    await oldGovernance.executeVote(7)
     await tellor.init()
+
   });
+
+  it("new 360 address set as _TELLOR_CONTRACT", async function() {
+    tellorContract = await tellor.getAddressVars(h.hash("_TELLOR_CONTRACT"))
+    assert(tellorContract == tellor360.address, "new 360 address not set as _TELLOR_CONTRACT")
+  })
+
+  it("init cannot be called twice", async function() {
+    await h.expectThrow(tellor.init(), "init should not be callable twice")
+  })
 
   it("depositStake", async function() {
     await tellor.connect(bigWallet).transfer(accounts[1].address, h.toWei("1000"))
