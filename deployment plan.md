@@ -5,13 +5,20 @@ Deploy Tellor 360 Ehereum
 4-Deploy governance (with multisig and flex address)
 5-Run INIT function on Flex to update the governance contract by owner only once 
 6-Deploy 360 
-8- Add staking rewards of 1 trb --add tx to monorepo deployment script
+7- Add staking rewards of 1 trb --add tx to monorepo deployment script
+
+
+
 
 After deployment:
+
 -Kick off vote 
 -tallyVote
+-sent trb to oracle
 -executeVote
 -init 360
+-mintToOracle to mint timebasedRewads
+
 
 What happens if there is a dispute right before the transition:
 -governance tokens should have been transferred when 360 init is run
