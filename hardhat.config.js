@@ -71,14 +71,21 @@ module.exports = {
       accounts: [process.env.TESTNET_PK],
       gas: 5000000 ,
       gasPrice: 50000000000
-    }  
+    } ,
+    gnosis: {
+      url: `${process.env.NODE_URL_GNOSIS}`,
+      accounts: [process.env.TESTNET_PK],
+      gas: 5000000 ,
+      gasPrice: 5000000000
+    } 
 
   },
   etherscan: {
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
-    apiKey: process.env.ETHERSCAN
+    //apiKey: process.env.ETHERSCAN
     //apiKey: process.env.POLYSCAN
+    apiKey: process.env.GNOSISSCAN
   },
 
   contractSizer: {
