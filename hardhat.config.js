@@ -65,7 +65,13 @@ module.exports = {
  
       //maxPriorityFeePerGas: ,
       //maxFeePerGas: 
-    }
+    },
+    chiado: {
+      url: `${process.env.NODE_URL_CHIADO}`,
+      accounts: [process.env.TESTNET_PK],
+      gas: 5000000 ,
+      gasPrice: 50000000000
+    }  
 
   },
   etherscan: {

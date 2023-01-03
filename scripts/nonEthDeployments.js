@@ -11,7 +11,9 @@ const web3 = require('web3');
 // tellor flex arguments
 
 //var tokenAddress = '0xCE4e32fE9D894f8185271Aa990D2dB425DF3E6bE' //mumbai
-var tokenAddress = '0xE3322702BEdaaEd36CdDAb233360B939775ae5f1';//polygon
+//var tokenAddress = '0xE3322702BEdaaEd36CdDAb233360B939775ae5f1';//polygon
+var tokenAddress = "0xe7147C5Ed14F545B4B17251992D1DB2bdfa26B6d" //chiado
+
 var stakeAmountDollarTarget = web3.utils.toWei("150");
 var stakingTokenPrice = web3.utils.toWei("15");
 var minTokenstakeAmount = web3.utils.toWei("10");
@@ -22,7 +24,8 @@ var stakingTokenPriceQueryId = '0x5c13cd9c97dbb98f2429c101a2a8150e6c7a0ddaff6124
 // governance arguments
 // tellorOracleAddress
 //var teamMultisigAddress = '0x80fc34a2f9FfE86F41580F47368289C402DEc660' //mumbai
-var teamMultisigAddress = '0x3F0C1eB3FA7fCe2b0932d6d4D9E03b5481F3f0A7'//polygon
+//var teamMultisigAddress = '0x3F0C1eB3FA7fCe2b0932d6d4D9E03b5481F3f0A7'//polygon
+var teamMultisigAddress = '0x15e6Cc0D69A162151Cadfba035aa10b82b12b970' //chiado
 
 // query data storage arguments
 // none
@@ -60,10 +63,10 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     if (net == "mainnet") {
         console.log("TellorFlex contract deployed to:", "https://etherscan.io/address/" + flex.address);
         console.log("   TellorFlex transaction hash:", "https://etherscan.io/tx/" + flex.deployTransaction.hash);
-    } else if (net == "rinkeby") {
-        console.log("TellorFlex contract deployed to:", "https://rinkeby.etherscan.io/address/" + flex.address);
-        console.log("    TellorFlex transaction hash:", "https://rinkeby.etherscan.io/tx/" + flex.deployTransaction.hash);
-    } else {
+    } else if (net == "chiado") {
+        console.log("TellorFlex contract deployed to:", "https://blockscout.chiadochain.net/address/" + flex.address);
+        console.log("    TellorFlex transaction hash:", "https://blockscout.chiadochain.net/tx/" + flex.deployTransaction.hash);
+      } else {
         console.log("Please add network explorer details")
     }
 
@@ -80,10 +83,10 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     if (net == "mainnet") {
         console.log("Governance contract deployed to:", "https://etherscan.io/address/" + governance.address);
         console.log("   Governance transaction hash:", "https://etherscan.io/tx/" + governance.deployTransaction.hash);
-    } else if (net == "rinkeby") {
-        console.log("Governance contract deployed to:", "https://rinkeby.etherscan.io/address/" + governance.address);
-        console.log("    Governance transaction hash:", "https://rinkeby.etherscan.io/tx/" + governance.deployTransaction.hash);
-    } else {
+    } else if (net == "chiado") {
+        console.log("Governance contract deployed to:", "https://blockscout.chiadochain.net/address/" + governance.address);
+        console.log("    Gov transaction hash:", "https://blockscout.chiadochain.net/tx/" + governance.deployTransaction.hash);
+   } else {
         console.log("Please add network explorer details")
     }
 
@@ -102,9 +105,9 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     if (net == "mainnet") {
         console.log("QueryDataStorage contract deployed to:", "https://etherscan.io/address/" + qstorage.address);
         console.log("    QueryDataStorage transaction hash:", "https://etherscan.io/tx/" + qstorage.deployTransaction.hash);
-    } else if (net == "rinkeby") {
-        console.log("QueryDataStorage contract deployed to:", "https://rinkeby.etherscan.io/address/" + qstorage.address);
-        console.log("    QueryDataStorage transaction hash:", "https://rinkeby.etherscan.io/tx/" + qstorage.deployTransaction.hash);
+    } else if (net == "chiado") {
+        console.log("QueryDataStorage contract deployed to:", "https://blockscout.chiadochain.net/address/" + qstorage.address);
+        console.log("    QueryDataStorage transaction hash:", "https://blockscout.chiadochain.net/tx/" + qstorage.deployTransaction.hash);
     } else {
         console.log("Please add network explorer details")
     }
@@ -122,14 +125,18 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     if (net == "mainnet") {
         console.log("Autopay contract deployed to:", "https://etherscan.io/address/" + autopay.address);
         console.log("   Autopay transaction hash:", "https://etherscan.io/tx/" + autopay.deployTransaction.hash);
-    } else if (net == "rinkeby") {
-        console.log("Autopay contract deployed to:", "https://rinkeby.etherscan.io/address/" + autopay.address);
-        console.log("    Autopay transaction hash:", "https://rinkeby.etherscan.io/tx/" + autopay.deployTransaction.hash);
+    } else if (net == "chiado") {
+        console.log("Autopay contract deployed to:", "https://blockscout.chiadochain.net/address/" + autopay.address);
+        console.log("    Autopay transaction hash:", "https://blockscout.chiadochain.net/tx/" + autopay.deployTransaction.hash);
     } else {
         console.log("Please add network explorer details")
     }
 
 
+          // init flex
+          console.log('initializing flex...');
+          await flex.init(governance.address, { gasPrice:100000000000 })
+          console.log('flex initialized');
     
 
 
@@ -207,7 +214,7 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
 }
 
 
-deployTellor360("polygon", process.env.TESTNET_PK, process.env.NODE_URL_MATIC, tokenAddress, reportingLock, stakeAmountDollarTarget, stakingTokenPrice, minTokenstakeAmount,stakingTokenPriceQueryId, teamMultisigAddress, autopayFee)
+deployTellor360("chiado", process.env.TESTNET_PK, process.env.NODE_URL_CHIADO, tokenAddress, reportingLock, stakeAmountDollarTarget, stakingTokenPrice, minTokenstakeAmount,stakingTokenPriceQueryId, teamMultisigAddress, autopayFee)
     .then(() => process.exit(0))
     .catch(error => {
         console.error(error);
