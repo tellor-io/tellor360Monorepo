@@ -57,15 +57,15 @@ module.exports = {
         gas: 5000000 ,
         gasPrice: 50000000000
       },
-    polygon: {
-      url: `${process.env.NODE_URL_MATIC}`,
-      accounts: [process.env.PRIVATE_KEY],
-      gas: 5000000 ,
-      gasPrice: 250000000000
+    // polygon: {
+    //   url: `${process.env.NODE_URL_MATIC}`,
+    //   accounts: [process.env.PRIVATE_KEY],
+    //   gas: 5000000 ,
+    //   gasPrice: 250000000000
  
       //maxPriorityFeePerGas: ,
       //maxFeePerGas: 
-    },
+    // },
     chiado: {
       url: `${process.env.NODE_URL_CHIADO}`,
       accounts: [process.env.TESTNET_PK],
@@ -85,7 +85,7 @@ module.exports = {
     // Obtain one at https://etherscan.io/
     //apiKey: process.env.ETHERSCAN
     //apiKey: process.env.POLYSCAN
-    apiKey: process.env.GNOSISSCAN
+    apiKey: process.env.ETHERSCAN
   },
 
   contractSizer: {

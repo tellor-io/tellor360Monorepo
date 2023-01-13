@@ -6,7 +6,7 @@ require("@nomiclabs/hardhat-waffle");
 require("dotenv").config();
 const web3 = require('web3');
 
-// npx hardhat run scripts/deploy.js --network goerli
+// npx hardhat run scripts/deploy-updateOracle.js --network goerli
 
 // tellor flex arguments
 var tokenAddress = '0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0';//goerli and ethereum mainnet
@@ -26,9 +26,6 @@ var stakingTokenPriceQueryId = '0x5c13cd9c97dbb98f2429c101a2a8150e6c7a0ddaff6124
 //var teamMultisigAddress = '0x80fc34a2f9FfE86F41580F47368289C402DEc660'//mumbai
 //var teamMultisigAddress = '0x3F0C1eB3FA7fCe2b0932d6d4D9E03b5481F3f0A7'//polygon
 var teamMultisigAddress = '0x4A1099d4897fFcc8eC7cb014B1a7442B28C7940C'//goerli
-
-// tellor360 arguments
-// tellorOracleAddress
 
 // query data storage arguments
 // none
@@ -63,11 +60,9 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     await flex.deployed()
 
     if (net == "mainnet") {
-        console.log("TellorFlex contract deployed to:", "https://etherscan.io/address/" + flex.address);
-        console.log("   TellorFlex transaction hash:", "https://etherscan.io/tx/" + flex.deployTransaction.hash);
+        console.log("https://etherscan.io/address/" + flex.address);
     } else if (net == "goerli") {
-        console.log("TellorFlex contract deployed to:", "https://goerli.etherscan.io/address/" + flex.address);
-        console.log("    TellorFlex transaction hash:", "https://goerli.etherscan.io/tx/" + flex.deployTransaction.hash);
+        console.log("https://goerli.etherscan.io/address/" + flex.address);
     } else {
         console.log("Please add network explorer details")
     }
@@ -83,11 +78,9 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     await governance.deployed()
 
     if (net == "mainnet") {
-        console.log("Governance contract deployed to:", "https://etherscan.io/address/" + governance.address);
-        console.log("   Governance transaction hash:", "https://etherscan.io/tx/" + governance.deployTransaction.hash);
+        console.log("https://etherscan.io/address/" + governance.address);
     } else if (net == "goerli") {
-        console.log("Governance contract deployed to:", "https://goerli.etherscan.io/address/" + governance.address);
-        console.log("    Governance transaction hash:", "https://goerli.etherscan.io/tx/" + governance.deployTransaction.hash);
+        console.log("https://goerli.etherscan.io/address/" + governance.address);
     } else {
         console.log("Please add network explorer details")
     }
@@ -103,11 +96,9 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     await qstorage.deployed();
 
     if (net == "mainnet") {
-        console.log("QueryDataStorage contract deployed to:", "https://etherscan.io/address/" + qstorage.address);
-        console.log("    QueryDataStorage transaction hash:", "https://etherscan.io/tx/" + qstorage.deployTransaction.hash);
+        console.log("https://etherscan.io/address/" + qstorage.address);
     } else if (net == "goerli") {
-        console.log("QueryDataStorage contract deployed to:", "https://goerli.etherscan.io/address/" + qstorage.address);
-        console.log("    QueryDataStorage transaction hash:", "https://goerli.etherscan.io/tx/" + qstorage.deployTransaction.hash);
+        console.log("https://goerli.etherscan.io/address/" + qstorage.address);
     } else {
         console.log("Please add network explorer details")
     }
@@ -122,11 +113,9 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     await autopay.deployed()
 
     if (net == "mainnet") {
-        console.log("Autopay contract deployed to:", "https://etherscan.io/address/" + autopay.address);
-        console.log("   Autopay transaction hash:", "https://etherscan.io/tx/" + autopay.deployTransaction.hash);
+        console.log("https://etherscan.io/address/" + autopay.address);
     } else if (net == "goerli") {
-        console.log("Autopay contract deployed to:", "https://goerli.etherscan.io/address/" + autopay.address);
-        console.log("    Autopay transaction hash:", "https://goerli.etherscan.io/tx/" + autopay.deployTransaction.hash);
+        console.log("https://goerli.etherscan.io/address/" + autopay.address);
     } else {
         console.log("Please add network explorer details")
     }
