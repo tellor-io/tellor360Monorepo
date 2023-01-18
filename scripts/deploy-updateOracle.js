@@ -8,47 +8,86 @@ const web3 = require('web3');
 
 // npx hardhat run scripts/deploy-updateOracle.js --network goerli
 
-// tellor flex arguments
-var tokenAddress = '0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0';//goerli and ethereum mainnet
-// var tokenAddress = '0xce4e32fe9d894f8185271aa990d2db425df3e6be';//mumbai
-//var tokenAddress = '0xE3322702BEdaaEd36CdDAb233360B939775ae5f1';//polygon
-//var tokenAddress = '0x51c59c6cAd28ce3693977F2feB4CfAebec30d8a2';//for goerli it will be the Master address
-
 var reportingLock = 3600 * 12; // 12 hours
 var stakeAmountDollarTarget = web3.utils.toWei("1500");
 var stakingTokenPrice = web3.utils.toWei("15");
 var minTRBstakeAmount = web3.utils.toWei("100")
-var stakingTokenPriceQueryId = '0x5c13cd9c97dbb98f2429c101a2a8150e6c7a0ddaff6124ee176a3a411067ded0'
-
-// governance arguments
-// tellorOracleAddress
-//var teamMultisigAddress = '0x2F51C4Bf6B66634187214A695be6CDd344d4e9d1' // goerli
-//var teamMultisigAddress = '0x80fc34a2f9FfE86F41580F47368289C402DEc660'//mumbai
-//var teamMultisigAddress = '0x3F0C1eB3FA7fCe2b0932d6d4D9E03b5481F3f0A7'//polygon
-var teamMultisigAddress = '0x4A1099d4897fFcc8eC7cb014B1a7442B28C7940C'//goerli
-
-// query data storage arguments
-// none
-
-// autopay arguments
-// tellorAddress
-// queryDataStorageAddress
 var autopayFee = 20 // '20' is 2%
 
 
-async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportingLock, _stakeAmountDollarTarget, _stakingTokenPrice,_minTRBstakeAmount , _stakingTokenPriceQueryId, _teamMultisigAddress, _autopayFee) {
+async function deployTellor360(_network, _reportingLock, _stakeAmountDollarTarget, _stakingTokenPrice,_minTRBstakeAmount , _autopayFee) {
     console.log("deploy tellor 360")
     await run("compile")
 
     var net = _network
-
+    var  _stakingTokenPriceQueryId = '0x5c13cd9c97dbb98f2429c101a2a8150e6c7a0ddaff6124ee176a3a411067ded0'
     ///////////////Connect to the network
-    let privateKey = _pk;
-    var provider = new ethers.providers.JsonRpcProvider(_nodeURL)
+    try {
+        if (net == "mainnet") {
+            var network = "mainnet"
+            var explorerUrl = "https://etherscan.io/address/"
+            var _tokenAddress = '0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0'
+            var _teamMultisigAddress = '0x39e419ba25196794b595b2a595ea8e527ddc9856'
+            var pubAddr = process.env.PUBLIC_KEY
+            var privateKey = process.env.PRIVATE_KEY
+            var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_MAINNET)
+        } else if (net == "goerli") {
+            var network = "goerli"
+            var explorerUrl = "https://goerli.etherscan.io/address/"
+            var _tokenAddress = '0x51c59c6cAd28ce3693977F2feB4CfAebec30d8a2'
+            var _teamMultisigAddress = '0x4A1099d4897fFcc8eC7cb014B1a7442B28C7940C'
+            var pubAddr = process.env.TESTNET_PUBLIC
+            var privateKey = process.env.TESTNET_PK
+            var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_GOERLI)           
+        } else if (net == "polygon") {
+            var network = "polygon"
+            var explorerUrl = "https://polygonscan.com/address/"
+            var _tokenAddress = '0xE3322702BEdaaEd36CdDAb233360B939775ae5f1'
+            var _teamMultisigAddress = '0x3F0C1eB3FA7fCe2b0932d6d4D9E03b5481F3f0A7'
+            var pubAddr = process.env.TESTNET_PUBLIC
+            var privateKey = process.env.TESTNET_PK
+            var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_POLYGON)
+        } else if (net == "mumbai") {
+            var network = "mumbai"
+            var explorerUrl = "https://mumbai.polygonscan.com/address/"
+            var _tokenAddress = '0xce4e32fe9d894f8185271aa990d2db425df3e6be'
+            var _teamMultisigAddress = '0x80fc34a2f9FfE86F41580F47368289C402DEc660'
+            var pubAddr = process.env.TESTNET_PUBLIC
+            var privateKey = process.env.TESTNET_PK
+            var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_MUMBAI)
+            
+        } else if (net == "chiado") {
+            var network = "chiado"
+            var explorerUrl = "https://blockscout.chiadochain.net/address/"
+            var _tokenAddress = '0xe7147C5Ed14F545B4B17251992D1DB2bdfa26B6d'
+            var _teamMultisigAddress = '0x15e6Cc0D69A162151Cadfba035aa10b82b12b970'
+            var pubAddr = process.env.TESTNET_PUBLIC
+            var privateKey = process.env.TESTNET_PK
+            var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_CHIADO)
+            
+        } else if (net == "gnosis") {
+            var network = "gnosis"
+            var explorerUrl = "https://gnosisscan.io/address/"
+            var _tokenAddress = '0xaad66432d27737ecf6ed183160adc5ef36ab99f2'
+            var _teamMultisigAddress = '0x9d119edeeF320f285704736f362cabC180a66f54'
+            var pubAddr = process.env.TESTNET_PUBLIC
+            var privateKey = process.env.TESTNET_PK
+            var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_CHIADO)
+            
+        } else {
+           console.log( "network not defined")
+        }
+
+        console.log("Tellor Address: ", tellorMasterAddress)
+        console.log("nework", network)
+        console.log("deploying from: ", pubAddr)
+        
+    } catch (error) {
+        console.error(error)
+        console.log("network error or environment not defined")
+        process.exit(1)
+    }
     let wallet = new ethers.Wallet(privateKey, provider)
-
-
-
     ////////////// Deploy Tellor 360
 
     //////////////// TellorFlex
@@ -58,16 +97,7 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     console.log("TellorFlex contract deployed to: ", flex.address)
 
     await flex.deployed()
-
-    if (net == "mainnet") {
-        console.log("https://etherscan.io/address/" + flex.address);
-    } else if (net == "goerli") {
-        console.log("https://goerli.etherscan.io/address/" + flex.address);
-    } else {
-        console.log("Please add network explorer details")
-    }
-
-
+    console.log(explorerUrl + flex.address)
 
     //////////////// Governance
     console.log("Starting deployment for governance contract...")
@@ -76,16 +106,8 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     console.log("Governance contract deployed to: ", governance.address)
 
     await governance.deployed()
+    console.log(explorerUrl + governance.address);
 
-    if (net == "mainnet") {
-        console.log("https://etherscan.io/address/" + governance.address);
-    } else if (net == "goerli") {
-        console.log("https://goerli.etherscan.io/address/" + governance.address);
-    } else {
-        console.log("Please add network explorer details")
-    }
-
-    
 
     ///////////// QueryDataStorage
     console.log("Starting deployment for QueryDataStorage contract...")
@@ -94,15 +116,7 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     console.log("QueryDataStorage contract deployed to: ", qstorage.address)
 
     await qstorage.deployed();
-
-    if (net == "mainnet") {
-        console.log("https://etherscan.io/address/" + qstorage.address);
-    } else if (net == "goerli") {
-        console.log("https://goerli.etherscan.io/address/" + qstorage.address);
-    } else {
-        console.log("Please add network explorer details")
-    }
-
+    console.log(explorerUrl + qstorage.address);
 
     //////////////// Autopay
     console.log("Starting deployment for Autopay contract...")
@@ -111,14 +125,7 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     console.log("Autopay contract deployed to: ", autopay.address)
 
     await autopay.deployed()
-
-    if (net == "mainnet") {
-        console.log("https://etherscan.io/address/" + autopay.address);
-    } else if (net == "goerli") {
-        console.log("https://goerli.etherscan.io/address/" + autopay.address);
-    } else {
-        console.log("Please add network explorer details")
-    }
+    console.log(explorerUrl + autopay.address);
 
 
     //////////////// Verify contracts
@@ -128,7 +135,6 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
     // Otherwise the etherscan api doesn't find the deployed contract.
     console.log('waiting for governance tx confirmation...');
     await governance.deployTransaction.wait(7)
-
     console.log('submitting contract for verification...');
 
     try {
@@ -207,7 +213,7 @@ async function deployTellor360(_network, _pk, _nodeURL, _tokenAddress, _reportin
 }
 
 
-deployTellor360("goerli", process.env.TESTNET_PK, process.env.NODE_URL_GOERLI, tokenAddress, reportingLock, stakeAmountDollarTarget, stakingTokenPrice, minTRBstakeAmount,stakingTokenPriceQueryId, teamMultisigAddress, autopayFee)
+deployTellor360("goerli", tokenAddress, reportingLock, stakeAmountDollarTarget, stakingTokenPrice, minTRBstakeAmount,stakingTokenPriceQueryId, teamMultisigAddress, autopayFee)
     .then(() => process.exit(0))
     .catch(error => {
         console.error(error);
