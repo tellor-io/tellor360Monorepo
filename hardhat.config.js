@@ -77,7 +77,13 @@ module.exports = {
       accounts: [process.env.TESTNET_PK],
       gas: 5000000 ,
       gasPrice: 5000000000
-    } 
+    } ,
+    arbitrum_testnet: {
+      url: `${process.env.NODE_URL_ARBITRUM_TESTNET}`,
+      accounts: [process.env.TESTNET_PK],
+      gas: 10000000 ,
+      gasPrice: 50000000000
+    }
 
   },
   etherscan: {
