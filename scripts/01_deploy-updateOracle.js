@@ -5,21 +5,22 @@ require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-waffle");
 require("dotenv").config();
 const web3 = require('web3');
+const hre = require("hardhat");
 
-// npx hardhat run scripts/deploy-updateOracle.js --network goerli
+// npx hardhat run scripts/01_deploy-updateOracle.js --network arbitrum_testnet
 
 var reportingLock = 3600 * 12; // 12 hours
-var stakeAmountDollarTarget = web3.utils.toWei("1500");
+var stakeAmountDollarTarget = web3.utils.toWei("100");
 var stakingTokenPrice = web3.utils.toWei("15");
-var minTRBstakeAmount = web3.utils.toWei("100")
+var minTRBstakeAmount = web3.utils.toWei("10")
 var autopayFee = 20 // '20' is 2%
 
 
-async function deployTellor360(_network, _reportingLock, _stakeAmountDollarTarget, _stakingTokenPrice,_minTRBstakeAmount , _autopayFee) {
+async function deployTellor360( _reportingLock, _stakeAmountDollarTarget, _stakingTokenPrice,_minTRBstakeAmount , _autopayFee) {
     console.log("deploy tellor 360")
     await run("compile")
 
-    var net = _network
+    var net = hre.network.name
     var  _stakingTokenPriceQueryId = '0x5c13cd9c97dbb98f2429c101a2a8150e6c7a0ddaff6124ee176a3a411067ded0'
     ///////////////Connect to the network
     try {
@@ -43,7 +44,7 @@ async function deployTellor360(_network, _reportingLock, _stakeAmountDollarTarge
             var network = "polygon"
             var explorerUrl = "https://polygonscan.com/address/"
             var _tokenAddress = '0xE3322702BEdaaEd36CdDAb233360B939775ae5f1'
-            var _teamMultisigAddress = '0x3F0C1eB3FA7fCe2b0932d6d4D9E03b5481F3f0A7'
+            var _teamMultisigAddress = '0xa3fe6d88f2ea92be357663ba9e747301e4cfc39B'
             var pubAddr = process.env.TESTNET_PUBLIC
             var privateKey = process.env.TESTNET_PK
             var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_POLYGON)
@@ -72,13 +73,30 @@ async function deployTellor360(_network, _reportingLock, _stakeAmountDollarTarge
             var _teamMultisigAddress = '0x9d119edeeF320f285704736f362cabC180a66f54'
             var pubAddr = process.env.TESTNET_PUBLIC
             var privateKey = process.env.TESTNET_PK
-            var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_CHIADO)
-            
+            var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_GNOSIS)
+
+        } else if (net == "optimism_goerli") {
+            var network = "optimism_goerli"
+            var explorerUrl = "https://gnosisscan.io/address/"
+            var _tokenAddress = ''
+            var _teamMultisigAddress = ''
+            var pubAddr = process.env.TESTNET_PUBLIC
+            var privateKey = process.env.TESTNET_PK
+            var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_GNOSIS)
+        } else if (net == "arbitrum_testnet") {
+            var network = "arbitrum_testnet"
+            var explorerUrl = "https://goerli.arbiscan.io/address/"
+            var _tokenAddress = '0x8d1bB5eDdFce08B92dD47c9871d1805211C3Eb3C'
+            var _teamMultisigAddress = '0xd71F72C18767083e4e3FE84F9c62b8038C1Ef4f6'
+            var pubAddr = process.env.TESTNET_PUBLIC
+            var privateKey = process.env.TESTNET_PK
+            var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_ARBITRUM_TESTNET)
+        
         } else {
            console.log( "network not defined")
         }
 
-        console.log("Tellor Address: ", tellorMasterAddress)
+        console.log("Tellor Address: ", _tokenAddress)
         console.log("nework", network)
         console.log("deploying from: ", pubAddr)
         
@@ -88,7 +106,7 @@ async function deployTellor360(_network, _reportingLock, _stakeAmountDollarTarge
         process.exit(1)
     }
     let wallet = new ethers.Wallet(privateKey, provider)
-    ////////////// Deploy Tellor 360
+    
 
     //////////////// TellorFlex
     console.log("Starting deployment for flex contract...")
@@ -213,7 +231,7 @@ async function deployTellor360(_network, _reportingLock, _stakeAmountDollarTarge
 }
 
 
-deployTellor360("goerli", tokenAddress, reportingLock, stakeAmountDollarTarget, stakingTokenPrice, minTRBstakeAmount,stakingTokenPriceQueryId, teamMultisigAddress, autopayFee)
+deployTellor360(  reportingLock, stakeAmountDollarTarget, stakingTokenPrice, minTRBstakeAmount, autopayFee)
     .then(() => process.exit(0))
     .catch(error => {
         console.error(error);
