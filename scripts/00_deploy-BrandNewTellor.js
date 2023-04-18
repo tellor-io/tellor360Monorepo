@@ -7,7 +7,7 @@ require("dotenv").config();
 const web3 = require('web3');
 const hre = require("hardhat");
 
-// npx hardhat run scripts/01_deploy-updateOracle.js --network filecoin
+// npx hardhat run scripts/00_deploy-BrandNewTellor.js --network sepolia
 
 var reportingLock = 3600 * 12; // 12 hours
 var stakeAmountDollarTarget = web3.utils.toWei("1500");
@@ -142,6 +142,18 @@ async function deployTellor360( _reportingLock, _stakeAmountDollarTarget, _staki
     await flex.deployed()
     console.log(explorerUrl + flex.address)
 
+
+
+    //////////////// Tellor360
+    console.log("Starting deployment for tellor360 contract...")
+    const tellor360fac = await ethers.getContractFactory("tellor360/contracts/Tellor360.sol:Tellor360", wallet)
+    const tellor360 = await tellor360fac.deploy(flex.address) // tellor oracle address
+    console.log("Tellor360 contract deployed to: ", tellor360.address)
+    
+    await tellor360.deployed()
+    console.log(explorerUrl + tellor360.address);
+
+
     //////////////// Governance
     console.log("Starting deployment for governance contract...")
     const govfac = await ethers.getContractFactory("polygongovernance/contracts/Governance.sol:Governance", wallet)
@@ -252,6 +264,23 @@ async function deployTellor360( _reportingLock, _stakeAmountDollarTarget, _staki
         console.log(e)
     }
 
+        // Wait for few confirmed transactions.
+    // Otherwise the etherscan api doesn't find the deployed contract.
+    console.log('waiting for tellor360 tx confirmation...');
+    await tellor360.deployTransaction.wait(7)
+
+    console.log('submitting contract for verification...');
+    try{
+    await run("verify:verify",
+        {
+            address: tellor360.address,
+            constructorArguments: [flex.address]
+        },
+    )
+    console.log("Tellor360 contract verified")
+    } catch (e) {
+    console.log(e)
+    }
 
 }
 

@@ -462,7 +462,26 @@ interface ITellor {
         );
 }
 
+interface Autopay {
+    struct FeedDetails {
+        uint256 reward;
+        uint256 balance;
+        uint256 startTime;
+        uint256 interval;
+        uint256 window;
+        uint256 priceThreshold;
+        uint256 rewardIncreasePerSecond;
+        uint256 feedsWithFundingIndex;
+    }
 
+    struct Tip {
+        uint256 amount;
+        uint256 timestamp;
+    }
+    function getStakeAmount() external view returns(uint256);
+    function stakeAmount() external view returns(uint256);
+    function token() external view returns(address);
+}
 
 /**
     * @dev EIP2362 Interface for pull oracles
@@ -477,7 +496,6 @@ interface IERC2362
 	 */
 	function valueFor(bytes32 _id) external view returns(int256,uint256,uint256);
 }
-
 interface IMappingContract{
     function getTellorID(bytes32 _id) external view returns(bytes32);
 }
@@ -836,20 +854,17 @@ contract UsingTellor is IERC2362 {
         }
     }
 }
-
-
-
+;
 interface IERC20 {
   function transfer(address _to, uint256 _amount) external returns(bool);
   function transferFrom(address _from, address _to, uint256 _amount) external returns(bool);
   function approve(address _spender, uint256 _amount) external returns(bool);
 }
-
-
 interface IQueryDataStorage {
   function storeData(bytes memory _queryData) external; 
   function getQueryData(bytes32 _queryId) external view returns (bytes memory);
 }
+
 
 /**
  @author Tellor Inc.

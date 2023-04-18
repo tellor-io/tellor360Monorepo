@@ -57,6 +57,20 @@ module.exports = {
         gas: 5000000 ,
         gasPrice: 50000000000
       },
+      tfilecoin: {
+        url: `${process.env.NODE_URL_FILECOIN_TESTNET}`,
+        accounts: [process.env.TESTNET_PK],
+        gas: 10000000 ,
+        gasPrice: 20000000000
+      },
+      filecoin: {
+        url: `${process.env.NODE_URL_FILECOIN}`,
+        accounts: [process.env.TESTNET_PK],
+        gas: 10000000 ,
+        gasPrice: 20000000000
+      },
+
+
     // polygon: {
     //   url: `${process.env.NODE_URL_MATIC}`,
     //   accounts: [process.env.PRIVATE_KEY],
@@ -83,16 +97,46 @@ module.exports = {
       accounts: [process.env.TESTNET_PK],
       gas: 10000000 ,
       gasPrice: 50000000000
+    },
+    sepolia: {
+      url: `${process.env.NODE_URL_SEPOLIA}`,
+      seeds: [process.env.TESTNET_PK],
+      gas: 9000000 ,
+      gasPrice: 5000000000
+  
     }
 
   },
+  // etherscan: {
+  //   // Your API key for Etherscan
+  //   // Obtain one at https://etherscan.io/
+  //   //apiKey: process.env.ETHERSCAN
+  //   //apiKey: process.env.POLYSCAN
+  //   apiKey: process.env.ETHERSCAN
+  // },
+
   etherscan: {
-    // Your API key for Etherscan
-    // Obtain one at https://etherscan.io/
-    //apiKey: process.env.ETHERSCAN
-    //apiKey: process.env.POLYSCAN
-    apiKey: process.env.ETHERSCAN
+    apiKey: {
+       // Your API key for Etherscan
+   // Obtain one at https://etherscan.io/
+   sepolia: process.env.ETHERSCAN
+   //apiKey: process.env.POLYSCAN
+   //apiKey: process.env.BSC_TOKEN
+   //apiKey: process.env.OPTIMISMSCAN
+    },
+    customChains: [
+      {
+        network: "sepolia",
+        chainId: 11155111,
+        urls: {
+          apiURL: "https://api-sepolia.etherscan.io/api",
+          browserURL: "https://sepolia.etherscan.io"
+        }
+      }
+    ]
   },
+
+
 
   contractSizer: {
     alphaSort: true,
