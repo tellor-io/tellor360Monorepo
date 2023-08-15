@@ -116,7 +116,15 @@ async function deployTellor360( _reportingLock, _stakeAmountDollarTarget, _staki
                 var pubAddr = process.env.TESTNET_PUBLIC
                 var privateKey = process.env.TESTNET_PK
                 var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_SEPOLIA)
-                   
+       } else if (net == "manta_testnet") {
+                var network = "manta_testnet"
+                var explorerUrl = "https://manta-testnet.calderaexplorer.xyz/address/"
+                var _tokenAddress = '0x896419Ed2E0dC848a1f7d2814F4e5Df4b9B9bFcc'
+                var _teamMultisigAddress = '0x34Fae97547E990ef0E05e05286c51E4645bf1A85'
+                var pubAddr = process.env.TESTNET_PUBLIC
+                var privateKey = process.env.TESTNET_PK
+                var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_MANTA_TESTNET)
+                           
         } else {
            console.log( "network not defined")
         }

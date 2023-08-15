@@ -103,7 +103,12 @@ module.exports = {
       seeds: [process.env.TESTNET_PK],
       gas: 9000000 ,
       gasPrice: 5000000000
-  
+    },
+    manta_testnet: {
+      url: `${process.env.NODE_URL_MANTA_TESTNET}`,
+      seeds: [process.env.TESTNET_PK],
+      gas: 8000000 ,
+      gasPrice: 1000000000
     }
 
   },
