@@ -7,36 +7,43 @@ const { keccak256 } = require("ethers/lib/utils");
 
 describe("Forking Tests - Before Upgrade", function() {
 
-  // // tellor360 NEW - mainnet
-  // const ORACLE_NEW = "0xB3B662644F8d3138df63D2F43068ea621e2981f9"
-  // const GOVERNANCE_NEW = "0x02803dcFD7Cb32E97320CFe7449BFb45b6C931b8"
-  // const AUTOPAY_NEW = "0x1F033Cb8A2Df08a147BC512723fd0da3FEc5cCA7"
-  // const TELLOR360 = "0xD3b9A1DCAbd16c482785Fd4265cB4580B84cdeD7"
-  // const QUERY_DATA_STORAGE = "0xA33ca1062762c8591E29E65bf7aC7ae8EC88b183"
+// Tellor Address:  0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0
+// nework mainnet
+// TellorFlex contract deployed to:  0x8cFc184c877154a8F9ffE0fe75649dbe5e2DBEbf
+// Governance contract deployed to:  0xB30b1B98d8276b80bC4f5aF9f9170ef3220EC27D
+// QueryDataStorage contract deployed to:  0xdB1F3bF0B267A87A440D4b1234636b6BB8781F6d
+// Autopay contract deployed to:  0x3b50dEc3CA3d34d5346228D86D29CF679EAA0Ccb
+
+  // tellor360 NEW - mainnet
+  const ORACLE_NEW = "0x8cFc184c877154a8F9ffE0fe75649dbe5e2DBEbf"
+  const GOVERNANCE_NEW = "0xB30b1B98d8276b80bC4f5aF9f9170ef3220EC27D"
+  const AUTOPAY_NEW = "0x3b50dEc3CA3d34d5346228D86D29CF679EAA0Ccb"
+  const TELLOR360 = "0xD3b9A1DCAbd16c482785Fd4265cB4580B84cdeD7"
+  const QUERY_DATA_STORAGE = "0xdB1F3bF0B267A87A440D4b1234636b6BB8781F6d"
  
-  // // before upgrade addresses - mainnet
-  // const tellorMaster = "0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0"
-  // const DEV_WALLET = "0x39e419ba25196794b595b2a595ea8e527ddc9856"
-  // const BIGWALLET = "0x14Cb3184F38C293Ee26D15269345CdC128CF6694"
-  // const GOVERNANCE_OLD = "0x51d4088d4EeE00Ae4c55f46E0673e9997121DB00"
-  // const REPORTER = "0x0D4F81320d36d7B7Cf5fE7d1D547f63EcBD1a3E0"
-  // const ORACLE_OLD = "0xe8218cACb0a5421BC6409e498d9f8CC8869945ea"
+  // before upgrade addresses - mainnet
+  const tellorMaster = "0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0"
+  const DEV_WALLET = "0x39e419ba25196794b595b2a595ea8e527ddc9856"
+  const BIGWALLET = "0xC482997311Bb58b938BC6b9220B67Bd11582E7b9"
+  const GOVERNANCE_OLD = "0x46038969D7DC0b17BC72137D07b4eDe43859DA45"
+  const REPORTER = "0x0D4F81320d36d7B7Cf5fE7d1D547f63EcBD1a3E0"
+  const ORACLE_OLD = "0xD9157453E2668B2fc45b7A803D3FEF3642430cC0"
 
 
-  // tellor360 NEW - goerli
-  const ORACLE_NEW = ""
-  const GOVERNANCE_NEW = ""
-  const AUTOPAY_NEW = ""
-  const TELLOR360 = ""
-  const QUERY_DATA_STORAGE = ""
+  // // tellor360 NEW - goerli
+  // const ORACLE_NEW = ""
+  // const GOVERNANCE_NEW = ""
+  // const AUTOPAY_NEW = ""
+  // const TELLOR360 = ""
+  // const QUERY_DATA_STORAGE = ""
 
-  // before upgrade addresses - goerli
-  const tellorMaster = ""
-  const DEV_WALLET = ""
-  const BIGWALLET = ""
-  const GOVERNANCE_OLD = ""
-  const REPORTER = ""
-  const ORACLE_OLD = ""
+  // // before upgrade addresses - goerli
+  // const tellorMaster = ""
+  // const DEV_WALLET = ""
+  // const BIGWALLET = ""
+  // const GOVERNANCE_OLD = ""
+  // const REPORTER = ""
+  // const ORACLE_OLD = ""
  
   
   const abiCoder = new ethers.utils.AbiCoder();
@@ -46,6 +53,9 @@ describe("Forking Tests - Before Upgrade", function() {
   const TRB_QUERY_DATA_ARGS = abiCoder.encode(["string", "string"], ["trb", "usd"])
   const TRB_QUERY_DATA = abiCoder.encode(["string", "bytes"], ["SpotPrice", TRB_QUERY_DATA_ARGS])
   const TRB_QUERY_ID = web3.utils.keccak256(TRB_QUERY_DATA)
+  const ETH_QUERY_DATA_ARGS = abiCoder.encode(["string", "string"], ["eth", "usd"])
+  const ETH_QUERY_DATA = abiCoder.encode(["string", "bytes"], ["SpotPrice", ETH_QUERY_DATA_ARGS])
+  const ETH_QUERY_ID = keccak256(ETH_QUERY_DATA)
   const TELLOR_ORACLE_ADDRESS_QUERY_DATA_ARGS = abiCoder.encode(["bytes"], ["0x"])
   const TELLOR_ORACLE_ADDRESS_QUERY_DATA = abiCoder.encode(["string", "bytes"], ["TellorOracleAddress", TELLOR_ORACLE_ADDRESS_QUERY_DATA_ARGS])
   const TELLOR_ORACLE_ADDRESS_QUERY_ID = web3.utils.keccak256(TELLOR_ORACLE_ADDRESS_QUERY_DATA)
@@ -68,8 +78,8 @@ describe("Forking Tests - Before Upgrade", function() {
       method: "hardhat_reset",
       params: [{forking: {
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            // blockNumber: 15818790 // mainnet - set block number to right after 1 TRB reward added
-            blockNumber: 7809705  // goerli - set block number to right after 1 TRB reward added
+            blockNumber: 18371600 // mainnet - set block number to right after flex deployed AND init() called
+            // blockNumber: 18377900  // goerli - set block number to right after flex deployed AND init() called
           },},],
       });
 
@@ -181,8 +191,9 @@ describe("Forking Tests - Before Upgrade", function() {
   it("addStakingRewards", async function() {
     await tellor.connect(bigWallet).transfer(accounts[1].address, h.toWei("1000"))
     await tellor.connect(accounts[1]).approve(oracle.address, h.toWei("1000"))
+    stakingRewardsBalBefore = await oracle.stakingRewardsBalance()
     await oracle.connect(accounts[1]).addStakingRewards(h.toWei("1000"))
-    assert(await oracle.stakingRewardsBalance() >= h.toWei("1000"), "staking rewards not updated correctly")
+    assert(BigInt(await oracle.stakingRewardsBalance()) - BigInt(stakingRewardsBalBefore) == BigInt(h.toWei("1000")), "staking rewards not updated correctly")
   })
 
   it("setup autopay feed", async function() {
@@ -302,16 +313,17 @@ describe("Forking Tests - Before Upgrade", function() {
     await tellor.connect(accounts[3]).approve(oracle.address, h.toWei("100"))
     await tellor.connect(accounts[10]).approve(oracle.address, h.toWei("100000"))
 
-    stakingRewardsBalance = await oracle.stakingRewardsBalance()
-    assert(stakingRewardsBalance == h.toWei("1"), "stakingRewardsBalance should start at 1 TRB")
+    stakingRewardsBalBefore = BigInt(await oracle.stakingRewardsBalance())
+    // assert(stakingRewardsBalance == h.toWei("1"), "stakingRewardsBalance should start at 1 TRB")
     await oracle.connect(accounts[10]).addStakingRewards(h.toWei("1000"))
-    stakingRewardsBalance = await oracle.stakingRewardsBalance()
-    assert(stakingRewardsBalance == h.toWei("1001"), "stakingRewardsBalance should be 1001 TRB")
+    stakingRewardsBalance = BigInt(await oracle.stakingRewardsBalance())
+    expectedStakingRewardsBalance = stakingRewardsBalBefore + BigInt(h.toWei("1000"))
+    assert(stakingRewardsBalance == expectedStakingRewardsBalance, "stakingRewardsBalance should be correct")
 
     await oracle.connect(accounts[1]).depositStake(h.toWei("100"))
 
     rewardRate = await oracle.rewardRate()
-    expectedRewardRate = BigInt(h.toWei("1001")) / BigInt(30 * 86400)
+    expectedRewardRate = expectedStakingRewardsBalance / BigInt(30 * 86400)
     assert(rewardRate == expectedRewardRate, "reward rate should be correct")
 
     await h.advanceTime(86400 * 30)
@@ -320,7 +332,7 @@ describe("Forking Tests - Before Upgrade", function() {
     balanceStaker1 = await tellor.balanceOf(accounts[1].address)
     stakingRewardsBalance = await oracle.stakingRewardsBalance()
     assert(stakingRewardsBalance == 0, "stakingRewardsBalance should be 0 TRB")
-    assert(balanceStaker1 == h.toWei("1001"), "staker 1 should have 1000 TRB reward")
+    assert(BigInt(balanceStaker1) == expectedStakingRewardsBalance, "staker 1 should earn all staking rewards")
     
     // stake more reporters, add more rewards
     await oracle.connect(accounts[2]).depositStake(h.toWei("100"))
@@ -721,7 +733,7 @@ describe("Forking Tests - Before Upgrade", function() {
     // report new oracle address to old oracle
     await tellor.connect(bigWallet).transfer(accounts[1].address, h.toWei("1000"))
     await tellor.connect(accounts[1]).approve(oracleOld.address, h.toWei("1000"))
-    await oracleOld.connect(accounts[2]).depositStake(h.toWei("1000"))
+    await oracleOld.connect(accounts[1]).depositStake(h.toWei("1000"))
     newOracleAddressEncoded = abiCoder.encode(["address"], [oracle.address])
     await oracleOld.connect(accounts[1]).submitValue(TELLOR_ORACLE_ADDRESS_QUERY_ID, newOracleAddressEncoded, 0, TELLOR_ORACLE_ADDRESS_QUERY_DATA)
 
@@ -735,6 +747,7 @@ describe("Forking Tests - Before Upgrade", function() {
     await tellor.connect(bigWallet).transfer(accounts[2].address, h.toWei("1000"))
     await tellor.connect(accounts[2]).approve(oracle.address, h.toWei("1000"))
     await oracle.connect(accounts[2]).depositStake(h.toWei("1000"))
+    await oracle.connect(accounts[2]).submitValue(ETH_QUERY_ID, h.uintTob32(100), 0, ETH_QUERY_DATA)
     
     // wait 7 days
     await h.advanceTime(86400 * 7)
@@ -747,59 +760,59 @@ describe("Forking Tests - Before Upgrade", function() {
     reporter1 = accounts[9]
     disputer = accounts[5]
     await tellor.connect(bigWallet).transfer(reporter1.address, h.toWei("1000"))
-    await tellor.connect(bigWallet).transfer(disputer.address, h.toWei("100"))
+    await tellor.connect(bigWallet).transfer(disputer.address, h.toWei("1000"))
 
     await tellor.connect(reporter1).approve(oracle.address, h.toWei("1000"))
     await oracle.connect(reporter1).depositStake(h.toWei("1000"))
     await oracle.connect(reporter1).submitValue(ETH_QUERY_ID, h.bytes(100), 0, ETH_QUERY_DATA)
     blocky = await h.getBlock()
-    assert(await oracle.getStakeAmount() == h.toWei("10"), "Stake amount should be correct")
-    assert(await tellor.balanceOf(disputer.address) == h.toWei("100"), "Disputer should have correct balance")
-    await tellor.connect(disputer).approve(governance.address, h.toWei("1"))
+    assert(await oracle.getStakeAmount() == h.toWei("100"), "Stake amount should be correct")
+    assert(await tellor.balanceOf(disputer.address) == h.toWei("1000"), "Disputer should have correct balance")
+    await tellor.connect(disputer).approve(governance.address, h.toWei("10"))
     await governance.connect(disputer).beginDispute(ETH_QUERY_ID, blocky.timestamp)
-    assert(await tellor.balanceOf(disputer.address) == h.toWei("99"), "Disputer should have correct balance")
+    assert(await tellor.balanceOf(disputer.address) == h.toWei("990"), "Disputer should have correct balance")
     voteInfo = await governance.getVoteInfo(1)
-    assert(voteInfo[1][3] == h.toWei("1"), "Dispute fee should be correct")
+    assert(voteInfo[1][3] == h.toWei("10"), "Dispute fee should be correct")
 
     await h.advanceTime(86400 * 1)
     await governance.tallyVotes(1)
-    await tellor.connect(disputer).approve(governance.address, h.toWei("2"))
+    await tellor.connect(disputer).approve(governance.address, h.toWei("20"))
     await governance.connect(disputer).beginDispute(ETH_QUERY_ID, blocky.timestamp)
-    assert(await tellor.balanceOf(disputer.address) == h.toWei("97"), "Disputer should have correct balance")
+    assert(await tellor.balanceOf(disputer.address) == h.toWei("970"), "Disputer should have correct balance")
     voteInfo = await governance.getVoteInfo(2)
-    assert(voteInfo[1][3] == h.toWei("2"), "Dispute fee should be correct")
+    assert(voteInfo[1][3] == h.toWei("20"), "Dispute fee should be correct")
 
     await h.advanceTime(86400 * 2)
     await governance.tallyVotes(2)
-    await tellor.connect(disputer).approve(governance.address, h.toWei("4"))
+    await tellor.connect(disputer).approve(governance.address, h.toWei("40"))
     await governance.connect(disputer).beginDispute(ETH_QUERY_ID, blocky.timestamp)
-    assert(await tellor.balanceOf(disputer.address) == h.toWei("93"), "Disputer should have correct balance")
+    assert(await tellor.balanceOf(disputer.address) == h.toWei("930"), "Disputer should have correct balance")
     voteInfo = await governance.getVoteInfo(3)
-    assert(voteInfo[1][3] == h.toWei("4"), "Dispute fee should be correct")
+    assert(voteInfo[1][3] == h.toWei("40"), "Dispute fee should be correct")
 
     await h.advanceTime(86400 * 3)
     await governance.tallyVotes(3)
-    await tellor.connect(disputer).approve(governance.address, h.toWei("8"))
+    await tellor.connect(disputer).approve(governance.address, h.toWei("80"))
     await governance.connect(disputer).beginDispute(ETH_QUERY_ID, blocky.timestamp)
-    assert(await tellor.balanceOf(disputer.address) == h.toWei("85"), "Disputer should have correct balance")
+    assert(await tellor.balanceOf(disputer.address) == h.toWei("850"), "Disputer should have correct balance")
     voteInfo = await governance.getVoteInfo(4)
-    assert(voteInfo[1][3] == h.toWei("8"), "Dispute fee should be correct")
+    assert(voteInfo[1][3] == h.toWei("80"), "Dispute fee should be correct")
 
     await h.advanceTime(86400 * 4)
     await governance.tallyVotes(4)
-    await tellor.connect(disputer).approve(governance.address, h.toWei("10"))
+    await tellor.connect(disputer).approve(governance.address, h.toWei("100"))
     await governance.connect(disputer).beginDispute(ETH_QUERY_ID, blocky.timestamp)
-    assert(await tellor.balanceOf(disputer.address) == h.toWei("75"), "Disputer should have correct balance")
+    assert(await tellor.balanceOf(disputer.address) == h.toWei("750"), "Disputer should have correct balance")
     voteInfo = await governance.getVoteInfo(5)
-    assert(voteInfo[1][3] == h.toWei("10"), "Dispute fee should be correct")
+    assert(voteInfo[1][3] == h.toWei("100"), "Dispute fee should be correct")
 
     await h.advanceTime(86400 * 5)
     await governance.tallyVotes(5)
-    await tellor.connect(disputer).approve(governance.address, h.toWei("10"))
+    await tellor.connect(disputer).approve(governance.address, h.toWei("100"))
     await governance.connect(disputer).beginDispute(ETH_QUERY_ID, blocky.timestamp)
-    assert(await tellor.balanceOf(disputer.address) == h.toWei("65"), "Disputer should have correct balance")
+    assert(await tellor.balanceOf(disputer.address) == h.toWei("650"), "Disputer should have correct balance")
     voteInfo = await governance.getVoteInfo(6)
-    assert(voteInfo[1][3] == h.toWei("10"), "Dispute fee should be correct")
+    assert(voteInfo[1][3] == h.toWei("100"), "Dispute fee should be correct")
   })
 
   it("Time based rewards don't steal from stakes pending withdrawal", async function() {
