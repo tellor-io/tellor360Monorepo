@@ -752,8 +752,16 @@ describe("Forking Tests - Before Upgrade", function() {
     // wait 7 days
     await h.advanceTime(86400 * 7)
 
+    //assert the _ORACLE_CONTRACT is old flex
+    oracleContract = await tellor.getAddressVars(h.hash("_ORACLE_CONTRACT"))
+    expect(oracleContract).to.equal(oracleOld.address)
+
     // call updateOracleAddress function at tellor master, 2nd time
     await tellor.connect(accounts[1]).updateOracleAddress()
+
+    //assert the _ORACLE_CONTRACT is new flex
+    oracleContract = await tellor.getAddressVars(h.hash("_ORACLE_CONTRACT"))
+    expect(oracleContract).to.equal(oracle.address)
   })
 
   it("dispute fee capped at stake amount, one report", async function() {
@@ -815,7 +823,7 @@ describe("Forking Tests - Before Upgrade", function() {
     assert(voteInfo[1][3] == h.toWei("100"), "Dispute fee should be correct")
   })
 
-  it("Time based rewards don't steal from stakes pending withdrawal", async function() {
+  it("time based rewards don't steal from stakes pending withdrawal", async function() {
     await tellor.connect(bigWallet).transfer(accounts[0].address, h.toWei("1000"))
     await tellor.approve(oracle.address, h.toWei("1000"))
     await oracle.depositStake(h.toWei("1000"))
@@ -825,6 +833,38 @@ describe("Forking Tests - Before Upgrade", function() {
     assert(await oracle.getTotalTimeBasedRewardsBalance() == 0, "total time based rewards balance should be 0")
     assert(await oracle.toWithdraw() == h.toWei("100"), "toWithdraw should be correct")
 	})
+
+  it("mint to oracle works with new oracle", async function() {
+    // report new oracle address to old oracle
+    await tellor.connect(bigWallet).transfer(accounts[1].address, h.toWei("1000"))
+    await tellor.connect(accounts[1]).approve(oracleOld.address, h.toWei("1000"))
+    await oracleOld.connect(accounts[1]).depositStake(h.toWei("1000"))
+    newOracleAddressEncoded = abiCoder.encode(["address"], [oracle.address])
+    await oracleOld.connect(accounts[1]).submitValue(TELLOR_ORACLE_ADDRESS_QUERY_ID, newOracleAddressEncoded, 0, TELLOR_ORACLE_ADDRESS_QUERY_DATA)
+
+    // wait 12 hours
+    await h.advanceTime(43200)
+
+    // call updateOracleAddress function at tellor master, 1st time
+    await tellor.connect(accounts[1]).updateOracleAddress()
+
+    // report ETH/USD price to new oracle
+    await tellor.connect(bigWallet).transfer(accounts[2].address, h.toWei("1000"))
+    await tellor.connect(accounts[2]).approve(oracle.address, h.toWei("1000"))
+    await oracle.connect(accounts[2]).depositStake(h.toWei("1000"))
+    await oracle.connect(accounts[2]).submitValue(ETH_QUERY_ID, h.uintTob32(100), 0, ETH_QUERY_DATA)
+    
+    // wait 7 days
+    await h.advanceTime(86400 * 7)
+
+    // call updateOracleAddress function at tellor master, 2nd time
+    await tellor.connect(accounts[1]).updateOracleAddress()
+
+    timeBasedRewardsBalBefore = await oracle.getTotalTimeBasedRewardsBalance()
+    await tellor.mintToOracle()
+    timeBasedRewardsBalAfter = await oracle.getTotalTimeBasedRewardsBalance()
+    assert(timeBasedRewardsBalAfter > timeBasedRewardsBalBefore, "Time based rewards bal should be greater after minting to oracle")
+  })
 })
 
 
