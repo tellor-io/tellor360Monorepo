@@ -5,7 +5,7 @@ const web3 = require('web3');
 const { ethers } = require("hardhat");
 const { keccak256 } = require("ethers/lib/utils");
 
-describe("Forking Tests - Before Upgrade", function() {
+describe("Forking Tests - Oracle Upgrade after Deploy", function() {
 
 // Tellor Address:  0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0
 // nework mainnet
@@ -23,11 +23,12 @@ describe("Forking Tests - Before Upgrade", function() {
  
   // before upgrade addresses - mainnet
   const tellorMaster = "0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0"
-  const DEV_WALLET = "0x39e419ba25196794b595b2a595ea8e527ddc9856"
+  const DEV_WALLET = "0x39E419bA25196794B595B2a595Ea8E527ddC9856"
   const BIGWALLET = "0xC482997311Bb58b938BC6b9220B67Bd11582E7b9"
   const GOVERNANCE_OLD = "0x46038969D7DC0b17BC72137D07b4eDe43859DA45"
   const REPORTER = "0x0D4F81320d36d7B7Cf5fE7d1D547f63EcBD1a3E0"
   const ORACLE_OLD = "0xD9157453E2668B2fc45b7A803D3FEF3642430cC0"
+  const PARACHUTE = "0x83eB2094072f6eD9F57d3F19f54820ee0BaE6084"
 
   // liquity - mainnet
   const LIQUITY_PRICE_FEED = "0x4c517D4e2C851CA76d7eC94B805269Df0f2201De"
@@ -1083,6 +1084,57 @@ describe("Forking Tests - Before Upgrade", function() {
     providerReports0 = await medianOracleAmpl.providerReports(tellorProviderAmpl.address, 0)
     providerReports1 = await medianOracleAmpl.providerReports(tellorProviderAmpl.address, 1)
     assert(providerReports0.payload == web3.utils.toWei(".99") || providerReports1.payload == web3.utils.toWei(".99"), "tellor report not pushed")
+  })
+
+  it("test parachute", async function() {
+    // ****** upgrade to new oracle ******
+    // report new oracle address to old oracle
+    await tellor.connect(bigWallet).transfer(accounts[1].address, h.toWei("1000"))
+    await tellor.connect(accounts[1]).approve(oracleOld.address, h.toWei("1000"))
+    await oracleOld.connect(accounts[1]).depositStake(h.toWei("1000"))
+    newOracleAddressEncoded = abiCoder.encode(["address"], [oracle.address])
+    await oracleOld.connect(accounts[1]).submitValue(TELLOR_ORACLE_ADDRESS_QUERY_ID, newOracleAddressEncoded, 0, TELLOR_ORACLE_ADDRESS_QUERY_DATA)
+
+    // wait 12 hours
+    await h.advanceTime(43200)
+
+    // call updateOracleAddress function at tellor master, 1st time
+    await tellor.connect(accounts[1]).updateOracleAddress()
+
+    // report ETH/USD price to new oracle
+    await tellor.connect(bigWallet).transfer(accounts[2].address, h.toWei("1000"))
+    await tellor.connect(accounts[2]).approve(oracle.address, h.toWei("1000"))
+    await oracle.connect(accounts[2]).depositStake(h.toWei("1000"))
+    await oracle.connect(accounts[2]).submitValue(ETH_QUERY_ID, h.uintTob32(100), 0, ETH_QUERY_DATA)
+    
+    // wait 7 days
+    await h.advanceTime(86400 * 7)
+
+    // call updateOracleAddress function at tellor master, 2nd time
+    await tellor.connect(accounts[1]).updateOracleAddress()
+
+
+    // test parachute
+    parachute = await ethers.getContractAt("tellor360/contracts/oldContracts/contracts/interfaces/ITellor.sol:ITellor", PARACHUTE, devWallet);
+    deityAddr = await tellor.getAddressVars(h.hash("_DEITY"))
+    assert(deityAddr == PARACHUTE, "deity should be parachute")
+    await parachute.rescueBrokenDataReporting()
+    deityAddr = await tellor.getAddressVars(h.hash("_DEITY"))
+    assert(deityAddr == PARACHUTE, "deity should be parachute")
+
+    // report ETH/USD price to new oracle
+    await oracle.connect(accounts[2]).submitValue(ETH_QUERY_ID, h.uintTob32(200), 0, ETH_QUERY_DATA)
+    await h.advanceTime(86400 * 7)
+    await parachute.rescueBrokenDataReporting()
+    deityAddr = await tellor.getAddressVars(h.hash("_DEITY"))
+    assert(deityAddr == PARACHUTE, "deity should be parachute")
+
+    await h.advanceTime(86400 * 7 + 1)
+    await parachute.rescueBrokenDataReporting()
+    deityAddr = await tellor.getAddressVars(h.hash("_DEITY"))
+    assert(deityAddr == DEV_WALLET, "deity should be devWallet")
+
+    await h.expectThrow(parachute.rescueFailedUpdate(), "rescueFailedUpdate should throw")
   })
 })
 
