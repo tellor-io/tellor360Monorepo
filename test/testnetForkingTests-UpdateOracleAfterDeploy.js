@@ -29,6 +29,12 @@ describe("Forking Tests - Before Upgrade", function() {
   const REPORTER = "0x0D4F81320d36d7B7Cf5fE7d1D547f63EcBD1a3E0"
   const ORACLE_OLD = "0xD9157453E2668B2fc45b7A803D3FEF3642430cC0"
 
+  // liquity - mainnet
+  const LIQUITY_PRICE_FEED = "0x4c517D4e2C851CA76d7eC94B805269Df0f2201De"
+  // ampleforth - mainnet
+  const TELLOR_PROVIDER_AMPL = "0xf5b7562791114fB1A8838A9E8025de4b7627Aa79"
+  const MEDIAN_ORACLE_AMPL = "0x99C9775E076FDF99388C029550155032Ba2d8914"
+
 
   // // tellor360 NEW - goerli
   // const ORACLE_NEW = ""
@@ -59,7 +65,10 @@ describe("Forking Tests - Before Upgrade", function() {
   const TELLOR_ORACLE_ADDRESS_QUERY_DATA_ARGS = abiCoder.encode(["bytes"], ["0x"])
   const TELLOR_ORACLE_ADDRESS_QUERY_DATA = abiCoder.encode(["string", "bytes"], ["TellorOracleAddress", TELLOR_ORACLE_ADDRESS_QUERY_DATA_ARGS])
   const TELLOR_ORACLE_ADDRESS_QUERY_ID = web3.utils.keccak256(TELLOR_ORACLE_ADDRESS_QUERY_DATA)
-  
+  const AMPL_QUERY_DATA_ARGS = abiCoder.encode(["bytes"], ["0x"])
+  const AMPL_QUERY_DATA = abiCoder.encode(["string", "bytes"], ["AmpleforthCustomSpotPrice", AMPL_QUERY_DATA_ARGS]);
+  const AMPL_QUERY_ID = web3.utils.keccak256(AMPL_QUERY_DATA);
+
 
   let accounts = null
   let tellor = null
@@ -864,6 +873,216 @@ describe("Forking Tests - Before Upgrade", function() {
     await tellor.mintToOracle()
     timeBasedRewardsBalAfter = await oracle.getTotalTimeBasedRewardsBalance()
     assert(timeBasedRewardsBalAfter > timeBasedRewardsBalBefore, "Time based rewards bal should be greater after minting to oracle")
+  })
+
+  it("Manually verify that Liquity reads from new oracle", async function() {
+    // ****** upgrade to new oracle ******
+    // report new oracle address to old oracle
+    await tellor.connect(bigWallet).transfer(accounts[1].address, h.toWei("1000"))
+    await tellor.connect(accounts[1]).approve(oracleOld.address, h.toWei("1000"))
+    await oracleOld.connect(accounts[1]).depositStake(h.toWei("1000"))
+    newOracleAddressEncoded = abiCoder.encode(["address"], [oracle.address])
+    await oracleOld.connect(accounts[1]).submitValue(TELLOR_ORACLE_ADDRESS_QUERY_ID, newOracleAddressEncoded, 0, TELLOR_ORACLE_ADDRESS_QUERY_DATA)
+
+    // wait 12 hours
+    await h.advanceTime(43200)
+
+    // call updateOracleAddress function at tellor master, 1st time
+    await tellor.connect(accounts[1]).updateOracleAddress()
+
+    // report ETH/USD price to new oracle
+    await tellor.connect(bigWallet).transfer(accounts[2].address, h.toWei("1000"))
+    await tellor.connect(accounts[2]).approve(oracle.address, h.toWei("1000"))
+    await oracle.connect(accounts[2]).depositStake(h.toWei("1000"))
+    await oracle.connect(accounts[2]).submitValue(ETH_QUERY_ID, h.uintTob32(100), 0, ETH_QUERY_DATA)
+    
+    // wait 7 days
+    await h.advanceTime(86400 * 7)
+
+    // call updateOracleAddress function at tellor master, 2nd time
+    await tellor.connect(accounts[1]).updateOracleAddress()
+
+
+    // ****** ensure liquity can read from new oracle ******
+    let liquityPriceFeed = await ethers.getContractAt("contracts/testing/liquity/IPriceFeed.sol:IPriceFeed", LIQUITY_PRICE_FEED)
+
+    await tellor.connect(bigWallet).transfer(accounts[10].address, BigInt(1000E18))
+    await tellor.connect(accounts[10]).approve(oracle.address, BigInt(1000E18))
+    await oracle.connect(accounts[10]).depositStake(BigInt(1000E18))
+    await oracle.connect(accounts[10]).submitValue(ETH_QUERY_ID,h.uintTob32(h.toWei("2095.15")),0,ETH_QUERY_DATA)
+    await h.advanceTime(60 * 15 + 1)
+    await liquityPriceFeed.fetchPrice()
+    lastGoodPrice = await liquityPriceFeed.lastGoodPrice()
+    expect(lastGoodPrice).to.eq("2095150000000000000000", "Liquity ether price should be correct")
+
+    await h.advanceTime(60*60*12)
+    await oracle.connect(accounts[10]).submitValue(ETH_QUERY_ID,h.uintTob32(h.toWei("3395.16")),0,ETH_QUERY_DATA)
+    await h.advanceTime(60 * 15 + 1)
+    await liquityPriceFeed.fetchPrice()
+    lastGoodPrice = await liquityPriceFeed.lastGoodPrice()
+    expect(lastGoodPrice).to.eq("3395160000000000000000", "Liquity ether price should be correct")
+
+    await h.advanceTime(60*60*12)
+    await oracle.connect(accounts[10]).submitValue(ETH_QUERY_ID,h.uintTob32(h.toWei("3395.17")),0,ETH_QUERY_DATA)
+    await h.advanceTime(60 * 15 + 1)
+    await liquityPriceFeed.fetchPrice()
+    lastGoodPrice = await liquityPriceFeed.lastGoodPrice()
+    assert(lastGoodPrice == "3395170000000000000000", "Liquity ether price should be correct")
+  });
+
+  it("Another liquity test", async function() {
+    // ****** upgrade to new oracle ******
+    // report new oracle address to old oracle
+    await tellor.connect(bigWallet).transfer(accounts[1].address, h.toWei("1000"))
+    await tellor.connect(accounts[1]).approve(oracleOld.address, h.toWei("1000"))
+    await oracleOld.connect(accounts[1]).depositStake(h.toWei("1000"))
+    newOracleAddressEncoded = abiCoder.encode(["address"], [oracle.address])
+    await oracleOld.connect(accounts[1]).submitValue(TELLOR_ORACLE_ADDRESS_QUERY_ID, newOracleAddressEncoded, 0, TELLOR_ORACLE_ADDRESS_QUERY_DATA)
+
+    // wait 12 hours
+    await h.advanceTime(43200)
+
+    // call updateOracleAddress function at tellor master, 1st time
+    await tellor.connect(accounts[1]).updateOracleAddress()
+
+    // report ETH/USD price to new oracle
+    await tellor.connect(bigWallet).transfer(accounts[2].address, h.toWei("1000"))
+    await tellor.connect(accounts[2]).approve(oracle.address, h.toWei("1000"))
+    await oracle.connect(accounts[2]).depositStake(h.toWei("1000"))
+    await oracle.connect(accounts[2]).submitValue(ETH_QUERY_ID, h.uintTob32(100), 0, ETH_QUERY_DATA)
+    
+    // wait 7 days
+    await h.advanceTime(86400 * 7)
+
+    // call updateOracleAddress function at tellor master, 2nd time
+    await tellor.connect(accounts[1]).updateOracleAddress()
+
+
+    let liquityPriceFeed = await ethers.getContractAt("contracts/testing/liquity/IPriceFeed.sol:IPriceFeed", LIQUITY_PRICE_FEED)
+    const TellorCallerTest = await ethers.getContractFactory("contracts/testing/liquity/TellorCaller.sol:TellorCaller")
+    let tellorCallerTest = await TellorCallerTest.deploy(tellor.address)
+
+    await tellor.connect(bigWallet).transfer(accounts[10].address, BigInt(1009E18))
+    await tellor.connect(accounts[10]).approve(oracle.address, BigInt(1000E18))
+    await oracle.connect(accounts[10]).depositStake(BigInt(1000E18))
+    await oracle.connect(accounts[10]).submitValue(ETH_QUERY_ID,h.uintTob32(h.toWei("2095.15")),0,ETH_QUERY_DATA)
+    blocky0 = await h.getBlock()
+    await h.advanceTime(60 * 15 + 1)
+
+    retrievedVal = await tellor["retrieveData(uint256,uint256)"](1, 0);
+    assert(retrievedVal == 2095150000, "retrieved data should be correct")
+
+    await liquityPriceFeed.fetchPrice()
+    lastGoodPrice = await liquityPriceFeed.lastGoodPrice()
+    expect(lastGoodPrice).to.equal("2095150000000000000000", "Liquity ether price should be correct")
+    currentVal = await tellorCallerTest.getTellorCurrentValue(1)
+    assert(currentVal[0] == true, "ifRetrieve should be correct")
+    assert(currentVal[1] == 2095150000, "current value should be correct")
+    assert(currentVal[2] == blocky0.timestamp, "current timestamp should be correct")
+
+    await h.advanceTime(60*60*12)
+    await oracle.connect(accounts[10]).submitValue(ETH_QUERY_ID,h.uintTob32(h.toWei("3395.16")),0,ETH_QUERY_DATA)
+    blocky1 = await h.getBlock()
+    
+    // fetch price without advancing time
+    await liquityPriceFeed.fetchPrice()
+    lastGoodPrice = await liquityPriceFeed.lastGoodPrice()
+    expect(lastGoodPrice).to.equal("2095150000000000000000", "Liquity ether price should be correct")
+    currentVal = await tellorCallerTest.getTellorCurrentValue(1)
+    assert(currentVal[0] == true, "ifRetrieve should be correct")
+    assert(currentVal[1] == 2095150000, "current value should be correct")
+    assert(currentVal[2] == blocky0.timestamp, "current timestamp should be correct")
+    
+    await h.advanceTime(60 * 15 + 1)
+    await liquityPriceFeed.fetchPrice()
+    lastGoodPrice = await liquityPriceFeed.lastGoodPrice()
+    currentVal = await tellorCallerTest.getTellorCurrentValue(1)
+    expect(lastGoodPrice).to.eq("3395160000000000000000", "Liquity ether price should be correct")
+    currentVal = await tellorCallerTest.getTellorCurrentValue(1)
+    assert(currentVal[0] == true, "ifRetrieve should be correct")
+    assert(currentVal[1] == 3395160000, "current value should be correct")
+    assert(currentVal[2] == blocky1.timestamp, "current timestamp should be correct")
+
+    await h.advanceTime(60*60*12)
+    await oracle.connect(accounts[10]).submitValue(ETH_QUERY_ID,h.uintTob32(h.toWei("3395.17")),0,ETH_QUERY_DATA)
+    await h.advanceTime(60 * 15 + 1)
+    await liquityPriceFeed.fetchPrice()
+    lastGoodPrice = await liquityPriceFeed.lastGoodPrice()
+    assert(lastGoodPrice == "3395170000000000000000", "Liquity ether price should be correct")
+  })
+
+  it("ampl can read from TellorMaster", async function() {
+    // ****** upgrade to new oracle ******
+    // report new oracle address to old oracle
+    await tellor.connect(bigWallet).transfer(accounts[1].address, h.toWei("1000"))
+    await tellor.connect(accounts[1]).approve(oracleOld.address, h.toWei("1000"))
+    await oracleOld.connect(accounts[1]).depositStake(h.toWei("1000"))
+    newOracleAddressEncoded = abiCoder.encode(["address"], [oracle.address])
+    await oracleOld.connect(accounts[1]).submitValue(TELLOR_ORACLE_ADDRESS_QUERY_ID, newOracleAddressEncoded, 0, TELLOR_ORACLE_ADDRESS_QUERY_DATA)
+
+    // wait 12 hours
+    await h.advanceTime(43200)
+
+    // call updateOracleAddress function at tellor master, 1st time
+    await tellor.connect(accounts[1]).updateOracleAddress()
+
+    // report ETH/USD price to new oracle
+    await tellor.connect(bigWallet).transfer(accounts[2].address, h.toWei("1000"))
+    await tellor.connect(accounts[2]).approve(oracle.address, h.toWei("1000"))
+    await oracle.connect(accounts[2]).depositStake(h.toWei("1000"))
+    await oracle.connect(accounts[2]).submitValue(ETH_QUERY_ID, h.uintTob32(100), 0, ETH_QUERY_DATA)
+    
+    // wait 7 days
+    await h.advanceTime(86400 * 7)
+
+    // call updateOracleAddress function at tellor master, 2nd time
+    await tellor.connect(accounts[1]).updateOracleAddress()
+
+
+    // ********************************************************
+    // *    ensure ampleforth can read from new oracle        *
+    // ********************************************************
+    let tellorProviderAmpl = await ethers.getContractAt("contracts/testing/TellorProvider.sol:TellorProvider", TELLOR_PROVIDER_AMPL)
+    let medianOracleAmpl = await ethers.getContractAt("contracts/testing/MedianOracle.sol:MedianOracle", MEDIAN_ORACLE_AMPL)
+
+    // submit ampl value to 360 oracle
+    await tellor.connect(bigWallet).transfer(accounts[1].address, h.toWei("1000"))
+    await tellor.connect(accounts[1]).approve(oracle.address, h.toWei("1000"))
+    await oracle.connect(accounts[1]).depositStake(h.toWei("1000"))
+    await oracle.connect(accounts[1]).submitValue(AMPL_QUERY_ID, h.uintTob32(web3.utils.toWei("1.23")), 0, AMPL_QUERY_DATA)
+    blocky2 = await h.getBlock()        
+
+    // advance time
+    await h.advanceTime(86400)
+
+    // push tellor value to ampl provider
+    await tellorProviderAmpl.pushTellor()
+
+    // ensure correct timestamp pushed to tellor provider
+    tellorReport = await tellorProviderAmpl.tellorReport()
+    assert(tellorReport[0] == blocky2.timestamp || tellorReport[1] == blocky2.timestamp, "tellor report not pushed")
+
+    // ensure correct oracle value pushed to medianOracle contract
+    providerReports0 = await medianOracleAmpl.providerReports(tellorProviderAmpl.address, 0)
+    providerReports1 = await medianOracleAmpl.providerReports(tellorProviderAmpl.address, 1)
+    assert(providerReports0.payload == web3.utils.toWei("1.23") || providerReports1.payload == web3.utils.toWei("1.23"), "tellor report not pushed")
+    
+    await oracle.connect(accounts[1]).submitValue(AMPL_QUERY_ID, h.uintTob32(web3.utils.toWei(".99")), 1, AMPL_QUERY_DATA)
+    blocky1 = await h.getBlock()
+
+    // advance time
+    await h.advanceTime(86400)
+    // push tellor value to ampl provider
+    await tellorProviderAmpl.pushTellor()
+    
+    // ensure correct timestamp pushed to tellor provider
+    tellorReport = await tellorProviderAmpl.tellorReport()
+    assert(tellorReport[0] == blocky1.timestamp || tellorReport[1] == blocky1.timestamp, "tellor report not pushed")
+
+    // ensure correct oracle value pushed to medianOracle contract
+    providerReports0 = await medianOracleAmpl.providerReports(tellorProviderAmpl.address, 0)
+    providerReports1 = await medianOracleAmpl.providerReports(tellorProviderAmpl.address, 1)
+    assert(providerReports0.payload == web3.utils.toWei(".99") || providerReports1.payload == web3.utils.toWei(".99"), "tellor report not pushed")
   })
 })
 
