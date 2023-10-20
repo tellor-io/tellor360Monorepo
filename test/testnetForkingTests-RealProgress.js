@@ -5,14 +5,7 @@ const web3 = require('web3');
 const { ethers } = require("hardhat");
 const { keccak256 } = require("ethers/lib/utils");
 
-describe.only("Forking Tests - Oracle Upgrade after Deploy", function() {
-
-// Tellor Address:  0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0
-// nework mainnet
-// TellorFlex contract deployed to:  0x8cFc184c877154a8F9ffE0fe75649dbe5e2DBEbf
-// Governance contract deployed to:  0xB30b1B98d8276b80bC4f5aF9f9170ef3220EC27D
-// QueryDataStorage contract deployed to:  0xdB1F3bF0B267A87A440D4b1234636b6BB8781F6d
-// Autopay contract deployed to:  0x3b50dEc3CA3d34d5346228D86D29CF679EAA0Ccb
+describe.only("Forking Tests - Real Progess", function() {
 
   // tellor360 NEW - mainnet
   const ORACLE_NEW = "0x8cFc184c877154a8F9ffE0fe75649dbe5e2DBEbf"
@@ -37,14 +30,14 @@ describe.only("Forking Tests - Oracle Upgrade after Deploy", function() {
   const MEDIAN_ORACLE_AMPL = "0x99C9775E076FDF99388C029550155032Ba2d8914"
 
 
-  // // tellor360 NEW - goerli
+  // // tellor360 NEW - sepolia
   // const ORACLE_NEW = ""
   // const GOVERNANCE_NEW = ""
   // const AUTOPAY_NEW = ""
   // const TELLOR360 = ""
   // const QUERY_DATA_STORAGE = ""
 
-  // // before upgrade addresses - goerli
+  // // before upgrade addresses - sepolia
   // const tellorMaster = ""
   // const DEV_WALLET = ""
   // const BIGWALLET = ""
