@@ -57,106 +57,106 @@ module.exports = {
       },
       allowUnlimitedContractSize: true
     },
-    goerli: {
-      url: `${process.env.NODE_URL_GOERLI}`,
-      accounts: [process.env.TESTNET_PK],
-      gas: 10000000 ,
-      gasPrice: 50000000000
-    },
-      // mainnet: {
-      //   url: `${process.env.NODE_URL_MAINNET}`,
-      //   accounts: [process.env.PRIVATE_KEY],
-      //   gas: 10000000 ,
-      //   gasPrice: 50000000000
-      // },
-   mumbai: {
-        url: `${process.env.NODE_URL_MUMBAI}`,
-        accounts: [process.env.TESTNET_PK],
-        gas: 5000000 ,
-        gasPrice: 50000000000
-      },
-      tfilecoin: {
-        url: `${process.env.NODE_URL_FILECOIN_TESTNET}`,
-        accounts: [process.env.TESTNET_PK],
-        gas: 10000000 ,
-        gasPrice: 20000000000
-      },
-      filecoin: {
-        url: `${process.env.NODE_URL_FILECOIN}`,
-        accounts: [process.env.TESTNET_PK],
-        gas: 10000000 ,
-        gasPrice: 20000000000
-      },
+  //   goerli: {
+  //     url: `${process.env.NODE_URL_GOERLI}`,
+  //     accounts: [process.env.TESTNET_PK],
+  //     gas: 10000000 ,
+  //     gasPrice: 50000000000
+  //   },
+  //     // mainnet: {
+  //     //   url: `${process.env.NODE_URL_MAINNET}`,
+  //     //   accounts: [process.env.PRIVATE_KEY],
+  //     //   gas: 10000000 ,
+  //     //   gasPrice: 50000000000
+  //     // },
+  //  mumbai: {
+  //       url: `${process.env.NODE_URL_MUMBAI}`,
+  //       accounts: [process.env.TESTNET_PK],
+  //       gas: 5000000 ,
+  //       gasPrice: 50000000000
+  //     },
+  //     tfilecoin: {
+  //       url: `${process.env.NODE_URL_FILECOIN_TESTNET}`,
+  //       accounts: [process.env.TESTNET_PK],
+  //       gas: 10000000 ,
+  //       gasPrice: 20000000000
+  //     },
+  //     filecoin: {
+  //       url: `${process.env.NODE_URL_FILECOIN}`,
+  //       accounts: [process.env.TESTNET_PK],
+  //       gas: 10000000 ,
+  //       gasPrice: 20000000000
+  //     },
 
 
-    // polygon: {
-    //   url: `${process.env.NODE_URL_MATIC}`,
-    //   accounts: [process.env.PRIVATE_KEY],
-    //   gas: 5000000 ,
-    //   gasPrice: 250000000000
+  //   // polygon: {
+  //   //   url: `${process.env.NODE_URL_MATIC}`,
+  //   //   accounts: [process.env.PRIVATE_KEY],
+  //   //   gas: 5000000 ,
+  //   //   gasPrice: 250000000000
  
-      //maxPriorityFeePerGas: ,
-      //maxFeePerGas: 
-    // },
-    chiado: {
-      url: `${process.env.NODE_URL_CHIADO}`,
-      accounts: [process.env.TESTNET_PK],
-      gas: 5000000 ,
-      gasPrice: 50000000000
-    } ,
-    gnosis: {
-      url: `${process.env.NODE_URL_GNOSIS}`,
-      accounts: [process.env.TESTNET_PK],
-      gas: 5000000 ,
-      gasPrice: 5000000000
-    } ,
-    arbitrum_testnet: {
-      url: `${process.env.NODE_URL_ARBITRUM_TESTNET}`,
-      accounts: [process.env.TESTNET_PK],
-      gas: 10000000 ,
-      gasPrice: 50000000000
-    },
-    sepolia: {
-      url: `${process.env.NODE_URL_SEPOLIA}`,
-      seeds: [process.env.TESTNET_PK],
-      gas: 9000000 ,
-      gasPrice: 5000000000
-    },
-    manta_testnet: {
-      url: `${process.env.NODE_URL_MANTA_TESTNET}`,
-      seeds: [process.env.TESTNET_PK],
-      gas: 8000000 ,
-      gasPrice: 1000000000
-    }
+  //     //maxPriorityFeePerGas: ,
+  //     //maxFeePerGas: 
+  //   // },
+  //   chiado: {
+  //     url: `${process.env.NODE_URL_CHIADO}`,
+  //     accounts: [process.env.TESTNET_PK],
+  //     gas: 5000000 ,
+  //     gasPrice: 50000000000
+  //   } ,
+  //   gnosis: {
+  //     url: `${process.env.NODE_URL_GNOSIS}`,
+  //     accounts: [process.env.TESTNET_PK],
+  //     gas: 5000000 ,
+  //     gasPrice: 5000000000
+  //   } ,
+  //   arbitrum_testnet: {
+  //     url: `${process.env.NODE_URL_ARBITRUM_TESTNET}`,
+  //     accounts: [process.env.TESTNET_PK],
+  //     gas: 10000000 ,
+  //     gasPrice: 50000000000
+  //   },
+  //   sepolia: {
+  //     url: `${process.env.NODE_URL_SEPOLIA}`,
+  //     seeds: [process.env.TESTNET_PK],
+  //     gas: 9000000 ,
+  //     gasPrice: 5000000000
+  //   },
+  //   manta_testnet: {
+  //     url: `${process.env.NODE_URL_MANTA_TESTNET}`,
+  //     seeds: [process.env.TESTNET_PK],
+  //     gas: 8000000 ,
+  //     gasPrice: 1000000000
+  //   }
 
-  },
-  // etherscan: {
-  //   // Your API key for Etherscan
-  //   // Obtain one at https://etherscan.io/
-  //   //apiKey: process.env.ETHERSCAN
-  //   //apiKey: process.env.POLYSCAN
-  //   apiKey: process.env.ETHERSCAN
   // },
+  // // etherscan: {
+  // //   // Your API key for Etherscan
+  // //   // Obtain one at https://etherscan.io/
+  // //   //apiKey: process.env.ETHERSCAN
+  // //   //apiKey: process.env.POLYSCAN
+  // //   apiKey: process.env.ETHERSCAN
+  // // },
 
-  etherscan: {
-    apiKey: {
-       // Your API key for Etherscan
-   // Obtain one at https://etherscan.io/
-   sepolia: process.env.ETHERSCAN
-   //apiKey: process.env.POLYSCAN
-   //apiKey: process.env.BSC_TOKEN
-   //apiKey: process.env.OPTIMISMSCAN
-    },
-    customChains: [
-      {
-        network: "sepolia",
-        chainId: 11155111,
-        urls: {
-          apiURL: "https://api-sepolia.etherscan.io/api",
-          browserURL: "https://sepolia.etherscan.io"
-        }
-      }
-    ]
+  // etherscan: {
+  //   apiKey: {
+  //      // Your API key for Etherscan
+  //  // Obtain one at https://etherscan.io/
+  //  sepolia: process.env.ETHERSCAN
+  //  //apiKey: process.env.POLYSCAN
+  //  //apiKey: process.env.BSC_TOKEN
+  //  //apiKey: process.env.OPTIMISMSCAN
+  //   },
+  //   customChains: [
+  //     {
+  //       network: "sepolia",
+  //       chainId: 11155111,
+  //       urls: {
+  //         apiURL: "https://api-sepolia.etherscan.io/api",
+  //         browserURL: "https://sepolia.etherscan.io"
+  //       }
+  //     }
+  //   ]
   },
 
 

@@ -21,7 +21,7 @@
   "dependencies": {
     "autopay": "github:tellor-io/autoPay",
     "dotenv": "^16.0.2",
-    "polygongovernance": "github:tellor-io/governance",
+    "polygongovernance": "github:tellor-io/governance-private",
     "solidity-coverage": "^0.7.21",
     "tellor360": "github:tellor-io/tellor360",
     "tellorflex": "github:tellor-io/tellorFlex",
