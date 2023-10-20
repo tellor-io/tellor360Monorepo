@@ -27,5 +27,6 @@
     "tellorflex": "github:tellor-io/tellorFlex",
     "usingtellor": "^5.0.0",
     "web3": "^1.7.5"
-  }
+  },
+  "mocha": {}
 }
