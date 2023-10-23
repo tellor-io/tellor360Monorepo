@@ -858,33 +858,6 @@ describe.only("Forking Tests - Real Progess", function() {
   });
 
   it("Another liquity test", async function() {
-    // ****** upgrade to new oracle ******
-    // report new oracle address to old oracle
-    await tellor.connect(bigWallet).transfer(accounts[1].address, h.toWei("1000"))
-    await tellor.connect(accounts[1]).approve(oracleOld.address, h.toWei("1000"))
-    await oracleOld.connect(accounts[1]).depositStake(h.toWei("1000"))
-    newOracleAddressEncoded = abiCoder.encode(["address"], [oracle.address])
-    await oracleOld.connect(accounts[1]).submitValue(TELLOR_ORACLE_ADDRESS_QUERY_ID, newOracleAddressEncoded, 0, TELLOR_ORACLE_ADDRESS_QUERY_DATA)
-
-    // wait 12 hours
-    await h.advanceTime(43200)
-
-    // call updateOracleAddress function at tellor master, 1st time
-    await tellor.connect(accounts[1]).updateOracleAddress()
-
-    // report ETH/USD price to new oracle
-    await tellor.connect(bigWallet).transfer(accounts[2].address, h.toWei("1000"))
-    await tellor.connect(accounts[2]).approve(oracle.address, h.toWei("1000"))
-    await oracle.connect(accounts[2]).depositStake(h.toWei("1000"))
-    await oracle.connect(accounts[2]).submitValue(ETH_QUERY_ID, h.uintTob32(100), 0, ETH_QUERY_DATA)
-    
-    // wait 7 days
-    await h.advanceTime(86400 * 7)
-
-    // call updateOracleAddress function at tellor master, 2nd time
-    await tellor.connect(accounts[1]).updateOracleAddress()
-
-
     let liquityPriceFeed = await ethers.getContractAt("contracts/testing/liquity/IPriceFeed.sol:IPriceFeed", LIQUITY_PRICE_FEED)
     const TellorCallerTest = await ethers.getContractFactory("contracts/testing/liquity/TellorCaller.sol:TellorCaller")
     let tellorCallerTest = await TellorCallerTest.deploy(tellor.address)
