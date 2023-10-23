@@ -1038,6 +1038,73 @@ describe.only("Forking Tests - Real Progess", function() {
 
     await h.expectThrow(parachute.rescueFailedUpdate(), "rescueFailedUpdate should throw")
   })
+
+  it("deployed params are correct", async function() {
+    // flex
+    expTokenAddr_Flex = "0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0"
+    expReportingLock = 86400/2
+    expUSDTarget = h.toWei("1500")
+    expMinStakeAmount = h.toWei("100")
+    expTRBQueryId = TRB_QUERY_ID
+    expGovAddr = GOVERNANCE_NEW
+
+    // gov
+    expFlexAddr_Gov = ORACLE_NEW
+    expMultisigAddr = DEV_WALLET
+    expTokenAddr_Gov = expTokenAddr_Flex
+
+    // autopay
+    expFlexAddr_Autopay = ORACLE_NEW
+    expQDataStorage = QUERY_DATA_STORAGE
+    expFee = 20
+
+    expect(await oracle.token()).to.equal(expTokenAddr_Flex)
+    expect(await oracle.reportingLock()).to.equal(expReportingLock)
+    expect(await oracle.stakeAmountDollarTarget()).to.equal(expUSDTarget)
+    expect(await oracle.minimumStakeAmount()).to.equal(expMinStakeAmount)
+    expect(await oracle.stakingTokenPriceQueryId()).to.equal(expTRBQueryId)
+    expect(await oracle.governance()).to.equal(expGovAddr)
+
+    expect(await governance.oracle()).to.equal(expFlexAddr_Gov)
+    expect(await governance.teamMultisig()).to.equal(expMultisigAddr)
+    expect(await governance.token()).to.equal(expTokenAddr_Gov)
+
+    expect(await autopay.tellor()).to.equal(expFlexAddr_Autopay)
+    expect(await autopay.queryDataStorage()).to.equal(expQDataStorage)
+    expect(await autopay.fee()).to.equal(expFee)
+  })
+
+  it("check reported values relevant to upgrade", async function() {
+    // new oracle addr reported to old oracle
+    blocky = await h.getBlock()
+    reportedOracleAddr_ToOld = await oracleOld.getDataBefore(TELLOR_ORACLE_ADDRESS_QUERY_ID, blocky.timestamp)
+    addrDecoded = abiCoder.decode(["address"], reportedOracleAddr_ToOld[1])
+    expect(addrDecoded[0]).to.equal(ORACLE_NEW)
+
+    // new oracle addr reported to new oracle
+    reportedOracleAddr_ToNew = await oracle.getDataBefore(TELLOR_ORACLE_ADDRESS_QUERY_ID, blocky.timestamp)
+    addrDecoded = abiCoder.decode(["address"], reportedOracleAddr_ToNew[1])
+    expect(addrDecoded[0]).to.equal(ORACLE_NEW)
+
+    // autopay addr reported to new oracle
+    reportedAutopayAddr = await oracle.getDataBefore(AUTOPAY_QUERY_ID, blocky.timestamp)
+    autopayAddrDecodedPartial = abiCoder.decode(["address[]"], reportedAutopayAddr[1])
+    autopayAddrArray = autopayAddrDecodedPartial[0]
+    expect(autopayAddrArray.length).to.equal(1)
+    expect(autopayAddrArray[0]).to.equal(AUTOPAY_NEW)
+
+    // trb price reported to new oracle
+    reportedTRBPrice = await oracle.getDataBefore(TRB_QUERY_ID, blocky.timestamp)
+    console.log(reportedTRBPrice)
+    expect(Number(reportedTRBPrice[2])).to.be.greaterThan(0)
+
+    // eth price reported to new oracle
+    firstRepETHPriceTime = await oracle.getTimestampbyQueryIdandIndex(ETH_QUERY_ID, 0)
+    firstRepETHPrice = await oracle.retrieveData(ETH_QUERY_ID, firstRepETHPriceTime)
+    expect(firstRepETHPrice[1]).to.not.equal('0x') // nonzero value
+    firstRepETHPriceDecoded = abiCoder.decode(["uint256"], firstRepETHPrice)
+    expect(Number(firstRepETHPriceDecoded[0])).to.be.greaterThan(0)
+  })
 })
 
 
