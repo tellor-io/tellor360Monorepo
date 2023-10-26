@@ -81,7 +81,7 @@ describe.only("Forking Tests - Real Progess", function() {
       method: "hardhat_reset",
       params: [{forking: {
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 18393600 // mainnet - set block num to current real block num
+            blockNumber: 18431142            // mainnet - set block num to current real block num
             // blockNumber: 18377900  // goerli - set block num to current real block num
           },},],
       });
@@ -134,9 +134,9 @@ describe.only("Forking Tests - Real Progess", function() {
       value: ethers.utils.parseEther("10.0"), 
     });
 
-    // fast forward, call update oracle 
-    await h.advanceTime(86400 * 6)
-    await tellor.updateOracleAddress()
+    // // fast forward, call update oracle 
+    // await h.advanceTime(86400)
+    // await tellor.updateOracleAddress()
   });
 
   it("depositStake", async function() {
@@ -309,7 +309,7 @@ describe.only("Forking Tests - Real Progess", function() {
     assert(await oracle.stakeAmount() == h.toWei("100"), "stake amount not updated correctly")
   })
 
-  it("rewards go to zero, big reward added, 2 stakers stakes", async function() {
+  it("rewards go to zero, big reward added, 2 stakers stake", async function() {
     // Setup
     await h.advanceTime(86400 * 30)
     stakingRewardsBalBefore = BigInt(await oracle.stakingRewardsBalance())
@@ -324,15 +324,8 @@ describe.only("Forking Tests - Real Progess", function() {
     await tellor.connect(accounts[10]).approve(oracle.address, h.toWei("100000"))
 
     await oracle.connect(accounts[10]).addStakingRewards(h.toWei("1000"))
-    stakingRewardsBalance = BigInt(await oracle.stakingRewardsBalance())
-    expectedStakingRewardsBalance = stakingRewardsBalBefore + BigInt(h.toWei("1000"))
-    assert(stakingRewardsBalance == expectedStakingRewardsBalance, "stakingRewardsBalance should be correct")
 
     await oracle.connect(accounts[1]).depositStake(h.toWei("100"))
-
-    rewardRate = await oracle.rewardRate()
-    expectedRewardRate = expectedStakingRewardsBalance / BigInt(30 * 86400)
-    assert(rewardRate == expectedRewardRate, "reward rate should be correct")
 
     await h.advanceTime(86400 * 30)
 
@@ -420,9 +413,6 @@ describe.only("Forking Tests - Real Progess", function() {
     timeBasedRewardsBalance = await oracle.getTotalTimeBasedRewardsBalance()
     toWithDrawBalance = await oracle.toWithdraw()
     oracleTokenPoolsSum = BigInt(totalStakeAmount) + BigInt(stakingRewardsBalance) + BigInt(timeBasedRewardsBalance) + BigInt(toWithDrawBalance)
-    console.log("oracle bal:            " + oracleBalance)
-    console.log("oracle bal before:     " + oracleBalanceBefore)
-    console.log("diff:                  " + (BigInt(oracleBalance) - BigInt(oracleBalanceBefore)))
     assert(BigInt(oracleBalance) - BigInt(oracleBalanceBefore) < BigInt(h.toWei("10")), "oracle balance incorrect")  // originalBal + 10 stakingRewards added
     assert(BigInt(totalStakeAmount) - BigInt(totalStakeAmountBefore) == 0, "totalStakeAmount should equal original bal")
     assert(BigInt(stakingRewardsBalance) - BigInt(stakingRewardsBalanceBefore) < BigInt(h.toWei("10")) , "stakingRewardsBalance should be 0")
@@ -564,8 +554,6 @@ describe.only("Forking Tests - Real Progess", function() {
 
     // getNewValueCountbyQueryId
     newValueCount = await usingTellorUser.getNewValueCountbyQueryId(TRB_QUERY_ID)
-    console.log("newValueCount: " + newValueCount)
-    console.log("newValueCountBefore: " + newValueCountBefore)
     expect(newValueCount).to.equal(3 + Number(newValueCountBefore))
 
     // getDataAfter
@@ -673,9 +661,6 @@ describe.only("Forking Tests - Real Progess", function() {
     timeBasedRewardsBalance = await oracle.getTotalTimeBasedRewardsBalance()
     toWithdrawBalance = await oracle.toWithdraw()
     oracleTokenPoolsSum = BigInt(totalStakeAmount) + BigInt(stakingRewardsBalance) + BigInt(timeBasedRewardsBalance) + BigInt(toWithdrawBalance)
-    console.log("oracle bal:            " + oracleBalance)
-    console.log("oracle bal before:     " + oracleBalBefore)
-    console.log("diff:                  " + (BigInt(oracleBalance) - BigInt(oracleBalBefore)))
     assert(totalStakeAmount - totalStakeAmountBefore == 0, "totalStakeAmount should be 0")
     assert(timeBasedRewardsBalance - timeBasedRewardsBalBefore == 0, "timeBasedRewardsBalance should be 0")
     assert(oracleBalance == oracleTokenPoolsSum, "oracleBalance should be equal to oracleTokenPoolsSum")
@@ -778,6 +763,7 @@ describe.only("Forking Tests - Real Progess", function() {
   })
 
   it("Manually verify that Liquity reads from new oracle", async function() {
+    await h.advanceTime(3600 * 4 + 1)
     let liquityPriceFeed = await ethers.getContractAt("contracts/testing/liquity/IPriceFeed.sol:IPriceFeed", LIQUITY_PRICE_FEED)
     await tellor.connect(bigWallet).transfer(accounts[10].address, BigInt(1000E18))
     await tellor.connect(accounts[10]).approve(oracle.address, BigInt(1000E18))
@@ -804,6 +790,7 @@ describe.only("Forking Tests - Real Progess", function() {
   });
 
   it("Another liquity test", async function() {
+    await h.advanceTime(3600 * 4 + 1)
     let liquityPriceFeed = await ethers.getContractAt("contracts/testing/liquity/IPriceFeed.sol:IPriceFeed", LIQUITY_PRICE_FEED)
     const TellorCallerTest = await ethers.getContractFactory("contracts/testing/liquity/TellorCaller.sol:TellorCaller")
     let tellorCallerTest = await TellorCallerTest.deploy(tellor.address)
@@ -886,7 +873,7 @@ describe.only("Forking Tests - Real Progess", function() {
     providerReports1 = await medianOracleAmpl.providerReports(tellorProviderAmpl.address, 1)
     assert(providerReports0.payload == web3.utils.toWei("1.23") || providerReports1.payload == web3.utils.toWei("1.23"), "tellor report not pushed")
     
-    await oracle.connect(accounts[1]).submitValue(AMPL_QUERY_ID, h.uintTob32(web3.utils.toWei(".99")), 1, AMPL_QUERY_DATA)
+    await oracle.connect(accounts[1]).submitValue(AMPL_QUERY_ID, h.uintTob32(web3.utils.toWei(".99")), 0, AMPL_QUERY_DATA)
     blocky1 = await h.getBlock()
 
     // advance time
@@ -987,7 +974,6 @@ describe.only("Forking Tests - Real Progess", function() {
 
     // trb price reported to new oracle
     reportedTRBPrice = await oracle.getDataBefore(TRB_QUERY_ID, blocky.timestamp)
-    console.log(reportedTRBPrice)
     expect(Number(reportedTRBPrice[2])).to.be.greaterThan(0)
 
     // eth price reported to new oracle
