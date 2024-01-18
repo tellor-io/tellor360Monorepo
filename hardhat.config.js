@@ -127,6 +127,12 @@ module.exports = {
       seeds: [process.env.TESTNET_PK],
       gas: 8000000 ,
       gasPrice: 1000000000
+    },
+    mantle_testnet: {
+      url: `${process.env.NODE_URL_MANTLE_TESTNET}`,
+      seeds: [process.env.TESTNET_PK],
+      gas: 8000000 ,
+      gasPrice: 1000000000
     }
 
   },
@@ -142,10 +148,11 @@ module.exports = {
     apiKey: {
        // Your API key for Etherscan
    // Obtain one at https://etherscan.io/
-   sepolia: process.env.ETHERSCAN
+   //sepolia: process.env.ETHERSCAN
    //apiKey: process.env.POLYSCAN
    //apiKey: process.env.BSC_TOKEN
    //apiKey: process.env.OPTIMISMSCAN
+   mantleTest: process.env.ETHERSCAN
     },
     customChains: [
       {
@@ -155,7 +162,17 @@ module.exports = {
           apiURL: "https://api-sepolia.etherscan.io/api",
           browserURL: "https://sepolia.etherscan.io"
         }
+      },
+      {
+        network: "mantleTest",
+        chainId: 5001,
+        urls: {
+        apiURL: "https://explorer.testnet.mantle.xyz/api",
+        browserURL: "https://explorer.testnet.mantle.xyz"
+        }
       }
+
+
     ]
   },
 
