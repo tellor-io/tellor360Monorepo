@@ -142,7 +142,19 @@ module.exports = {
     zkevm: {
       url: `${process.env.NODE_URL_ZKEVM_POLYGON}`,
       seeds: [process.env.TESTNET_PK]
-    }  
+    },
+    linea_testnet: {
+      url: `${process.env.NODE_URL_LINEA_TESTNET}`,
+      seeds: [process.env.TESTNET_PK],
+      gas: 8000000 ,
+      gasPrice: 1000000000
+    },
+    linea: {
+      url: `${process.env.NODE_URL_LINEA}`,
+      seeds: [process.env.TESTNET_PK],
+      gas: 8000000 ,
+      gasPrice: 1000000000
+    },  
 
   },
 

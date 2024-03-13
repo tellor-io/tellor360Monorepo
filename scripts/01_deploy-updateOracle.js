@@ -9,13 +9,7 @@ const web3 = require('web3');
 const hre = require("hardhat"); 
 
 
-var sleepSetTimeout_ctrl;
-
-function sleep(ms) {
-    clearInterval(sleepSetTimeout_ctrl);
-    return new Promise(resolve => sleepSetTimeout_ctrl = setTimeout(resolve, ms));
-}
-// npx hardhat run scripts/01_deploy-updateOracle.js --network zkevm
+// npx hardhat run scripts/01_deploy-updateOracle.js --network linea_testnet
 
 var reportingLock = 3600 * 12; // 12 hours
 var stakeAmountDollarTarget = web3.utils.toWei("375");
@@ -49,8 +43,15 @@ async function deployUpdateOracle( _reportingLock, _stakeAmountDollarTarget, _st
             var pubAddr = process.env.TESTNET_PUBLIC
             var privateKey = process.env.TESTNET_PK
             var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_SEPOLIA)
+        } else if (net == "goerli") {
+            var network = "goerli"
+            var explorerUrl = "https://sepolia.etherscan.io/address/"
+            var _tokenAddress = '0x80fc34a2f9FfE86F41580F47368289C402DEc660'
+            var _teamMultisigAddress = '0x34Fae97547E990ef0E05e05286c51E4645bf1A85'
+            var pubAddr = process.env.TESTNET_PUBLIC
+            var privateKey = process.env.TESTNET_PK
+            var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_GOERLI)
 
- 
         } else if (net == "polygon") {
             var network = "polygon"
             var explorerUrl = "https://polygonscan.com/address/"
@@ -191,8 +192,26 @@ async function deployUpdateOracle( _reportingLock, _stakeAmountDollarTarget, _st
                     var _teamMultisigAddress = '0xf23deabeD07E47e13462acE41B069c3eC5368E03'
                     var pubAddr = process.env.TESTNET_PUBLIC
                     var privateKey = process.env.TESTNET_PK
-                    var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_ZKEVM_POLYGON)          
-                        
+                    var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_ZKEVM_POLYGON)  
+                    
+                    
+        } else if (net == "linea_testnet") {
+                    var network = "linea_testnet"
+                    var explorerUrl = "https://goerli.lineascan.build/address/"
+                    var _tokenAddress = '0x896419Ed2E0dC848a1f7d2814F4e5Df4b9B9bFcc'
+                    var _teamMultisigAddress = '0x34Fae97547E990ef0E05e05286c51E4645bf1A85'
+                    var pubAddr = process.env.TESTNET_PUBLIC
+                    var privateKey = process.env.TESTNET_PK
+                    var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_LINEA_TESTNET)          
+        } else if (net == "linea") {
+                    var network = "linea"
+                    var explorerUrl = "https://lineascan.build/address/"
+                    var _tokenAddress = ''
+                    var _teamMultisigAddress = ''
+                    var pubAddr = process.env.TESTNET_PUBLIC
+                    var privateKey = process.env.TESTNET_PK
+                    var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_LINEAß)          
+                  
         } else {
            console.log( "network not defined")
         }
