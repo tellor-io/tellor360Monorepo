@@ -1,18 +1,26 @@
 require("hardhat-gas-reporter");
 require('hardhat-contract-sizer');
 require("@nomiclabs/hardhat-ethers");
-require("@nomiclabs/hardhat-etherscan");
+//require("@nomiclabs/hardhat-etherscan");
+//require("@nomicfoundation/hardhat-verify");
 require("@nomiclabs/hardhat-waffle");
 require("dotenv").config();
 const web3 = require('web3');
 const hre = require("hardhat"); 
 
-// npx hardhat run scripts/01_deploy-updateOracle.js --network mantle_testnet
+
+var sleepSetTimeout_ctrl;
+
+function sleep(ms) {
+    clearInterval(sleepSetTimeout_ctrl);
+    return new Promise(resolve => sleepSetTimeout_ctrl = setTimeout(resolve, ms));
+}
+// npx hardhat run scripts/01_deploy-updateOracle.js --network zkevm
 
 var reportingLock = 3600 * 12; // 12 hours
-var stakeAmountDollarTarget = web3.utils.toWei("1500");
-var stakingTokenPrice = web3.utils.toWei("150");
-var minTRBstakeAmount = web3.utils.toWei("100")
+var stakeAmountDollarTarget = web3.utils.toWei("375");
+var stakingTokenPrice = web3.utils.toWei("100");
+var minTRBstakeAmount = web3.utils.toWei("25")
 var autopayFee = 20 // '20' is 2%
 
 
@@ -168,7 +176,23 @@ async function deployUpdateOracle( _reportingLock, _stakeAmountDollarTarget, _st
                     var pubAddr = process.env.TESTNET_PUBLIC
                     var privateKey = process.env.TESTNET_PK
                     var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_MANTLE_TESTNET)          
-            
+        } else if (net == "zkevm_testnet") {
+                    var network = "zkevm_testnet"
+                    var explorerUrl = "https://cardona-zkevm.polygonscan.com/address/"
+                    var _tokenAddress = '0x896419Ed2E0dC848a1f7d2814F4e5Df4b9B9bFcc'
+                    var _teamMultisigAddress = '0x34Fae97547E990ef0E05e05286c51E4645bf1A85'
+                    var pubAddr = process.env.TESTNET_PUBLIC
+                    var privateKey = process.env.TESTNET_PK
+                    var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_ZKEVM_TESTNET)          
+        } else if (net == "zkevm") {
+                    var network = "zkevm"
+                    var explorerUrl = "https://zkevm.polygonscan.com/address/"
+                    var _tokenAddress = '0x03346b2f4bc23fd7f4935f74e70c7a7febc45313'
+                    var _teamMultisigAddress = '0xf23deabeD07E47e13462acE41B069c3eC5368E03'
+                    var pubAddr = process.env.TESTNET_PUBLIC
+                    var privateKey = process.env.TESTNET_PK
+                    var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_ZKEVM_POLYGON)          
+                        
         } else {
            console.log( "network not defined")
         }
@@ -188,48 +212,73 @@ async function deployUpdateOracle( _reportingLock, _stakeAmountDollarTarget, _st
     //////////////// TellorFlex
     console.log("Starting deployment for flex contract...")
     const flexfac = await ethers.getContractFactory("tellorflex/contracts/TellorFlex.sol:TellorFlex", wallet)
-    const flex = await flexfac.deploy(_tokenAddress, _reportingLock, _stakeAmountDollarTarget, _stakingTokenPrice,_minTRBstakeAmount , _stakingTokenPriceQueryId)
-    console.log("TellorFlex contract deployed to: ", flex.address)
-
+    const flex = await flexfac.deploy(_tokenAddress, _reportingLock, _stakeAmountDollarTarget, _stakingTokenPrice,_minTRBstakeAmount , _stakingTokenPriceQueryId, { gasPrice:10000000000 , gasLimit: 8000000   })
+          
     await flex.deployed()
+    console.log("TellorFlex contract deployed to: ", flex.address)
     console.log(explorerUrl + flex.address)
-
+    await flex.deployTransaction.wait(7)
+  //  sleep(5000)
     
 
     //////////////// Governance
     console.log("Starting deployment for governance contract...")
     const govfac = await ethers.getContractFactory("polygongovernance/contracts/Governance.sol:Governance", wallet)
-    const governance = await govfac.deploy(flex.address, _teamMultisigAddress)
-    console.log("Governance contract deployed to: ", governance.address)
-
+    const governance = await govfac.deploy(flex.address, _teamMultisigAddress, { gasPrice:10000000000 , gasLimit: 8000000   })
+    
     await governance.deployed()
+    console.log("Governance contract deployed to: ", governance.address)
     console.log(explorerUrl + governance.address);
 
+    await governance.deployTransaction.wait(7)
+  //  sleep(5000)
+
+    // var TellorFlex = '0x9EA18BFDB50E9bb4A18F9d3Df7804E398F8fE0dc'
+    // var Governance = '0x89e44099f5E80484dcF48995080481214b9c2D7c'
+
+    //////////////// TellorFlex
+    
+//     const flex = await ethers.getContractAt("tellorflex/contracts/TellorFlex.sol:TellorFlex",TellorFlex, wallet )
+//    console.log("TellorFlex contract deployed to: ", flex.address)
+
+//     //////////////// Governance
+    
+//     const governance = await ethers.getContractAt("polygongovernance/contracts/Governance.sol:Governance", Governance, wallet)
+//     console.log("Governance contract deployed to: ", governance.address)
+ 
+//     QueryDataStorage = '0xe331afe3a8d7836bedf1f09bc91549f4bc8c60c9'
+//       ///////////// QueryDataStorage
+//       const qstorage = await ethers.getContractAt("autopay/contracts/QueryDataStorage.sol:QueryDataStorage", QueryDataStorage, wallet)
+//       console.log("QueryDataStorage contract deployed to: ", qstorage.address)
 
     ///////////// QueryDataStorage
     console.log("Starting deployment for QueryDataStorage contract...")
     const qstoragefac = await ethers.getContractFactory("autopay/contracts/QueryDataStorage.sol:QueryDataStorage", wallet)
-    const qstorage = await qstoragefac.deploy()
+    const qstorage = await qstoragefac.deploy({ gasPrice:10000000000 , gasLimit: 2000000   })
     console.log("QueryDataStorage contract deployed to: ", qstorage.address)
 
     await qstorage.deployed();
     console.log(explorerUrl + qstorage.address);
     await qstorage.deployTransaction.wait(7)
+   // sleep(5000)
 
     //////////////// Autopay
     console.log("Starting deployment for Autopay contract...")
     const autopayfac = await ethers.getContractFactory("autopay/contracts/Autopay.sol:Autopay", wallet)
-    const autopay = await autopayfac.deploy(flex.address, qstorage.address, _autopayFee ) // tellorOracleAddress, queryDataStorageAddress, autopayFee
-    console.log("Autopay contract deployed to: ", autopay.address)
+    const autopay = await autopayfac.deploy(flex.address, qstorage.address, _autopayFee, { gasPrice:10000000000 , gasLimit: 5000000   } ) // tellorOracleAddress, queryDataStorageAddress, autopayFee
+    
 
     await autopay.deployed()
+    console.log("Autopay contract deployed to: ", autopay.address)
     console.log(explorerUrl + autopay.address);
     await autopay.deployTransaction.wait(7)
+   // sleep(5000)
 
     // init flex
     console.log('initializing flex...');
-    await flex.init(governance.address, )
+    await flex.init(governance.address, { gasPrice:10000000000 , gasLimit: 2000000   } )
     console.log('flex initialized');
+  //  sleep(5000)
     //////////////// Verify contracts
 
 
@@ -237,78 +286,78 @@ async function deployUpdateOracle( _reportingLock, _stakeAmountDollarTarget, _st
     // Otherwise the etherscan api doesn't find the deployed contract.
 
 
-    console.log('waiting for governance tx confirmation...');
-   // await governance.deployTransaction.wait(7)
-    console.log('submitting contract for verification...');
+//     console.log('waiting for governance tx confirmation...');
+//    // await governance.deployTransaction.wait(7)
+//     console.log('submitting contract for verification...');
 
-    try {
-        await run("verify:verify",
-            {
-                address: governance.address,
-                constructorArguments: [flex.address, _teamMultisigAddress]
-            },
-        )
-        console.log("Governance contract verified")
-    } catch (e) {
-        console.log(e)
-    }
-
-
-    // Wait for few confirmed transactions.
-    // Otherwise the etherscan api doesn't find the deployed contract.
-    console.log('waiting for flex tx confirmation...');
-    //await flex.deployTransaction.wait(7)
-
-    console.log('submitting contract for verification...');
-
-    try {
-        await run("verify:verify",
-            {
-                address: flex.address,
-                constructorArguments: [_tokenAddress, _reportingLock, _stakeAmountDollarTarget, _stakingTokenPrice,_minTRBstakeAmount, _stakingTokenPriceQueryId]
-            },
-        )
-        console.log("TellorFlex contract verified")
-    } catch (e) {
-        console.log(e)
-    }
+//     try { 
+//         await run("verify:verify",
+//             {
+//                 address: governance.address,
+//                 constructorArguments: [flex.address, _teamMultisigAddress]
+//             },
+//         )
+//         console.log("Governance contract verified")
+//     } catch (e) {
+//         console.log(e)
+//     }
 
 
-        // Wait for few confirmed transactions.
-    // Otherwise the etherscan api doesn't find the deployed contract.
-    console.log('waiting for autopay tx confirmation...');
-   // await autopay.deployTransaction.wait(7)
+//     // Wait for few confirmed transactions.
+//     // Otherwise the etherscan api doesn't find the deployed contract.
+//     console.log('waiting for flex tx confirmation...');
+//     //await flex.deployTransaction.wait(7)
 
-    console.log('submitting autopay contract for verification...');
-    try {
-        await run("verify:verify",
-            {
-                address: autopay.address,
-                constructorArguments: [flex.address, qstorage.address, _autopayFee]
-            },
-        )
-        console.log("autopay contract verified")
-    } catch (e) {
-        console.log(e)
-    }
+//     console.log('submitting contract for verification...');
+
+//     try {
+//         await run("verify:verify",
+//             {
+//                 address: flex.address,
+//                 constructorArguments: [_tokenAddress, _reportingLock, _stakeAmountDollarTarget, _stakingTokenPrice,_minTRBstakeAmount, _stakingTokenPriceQueryId]
+//             },
+//         )
+//         console.log("TellorFlex contract verified")
+//     } catch (e) {
+//         console.log(e)
+//     }
 
 
-    // Wait for few confirmed transactions.
-    // Otherwise the etherscan api doesn't find the deployed contract.
-    console.log('waiting for query data storage tx confirmation...');
-    //await qstorage.deployTransaction.wait(7)
+//         // Wait for few confirmed transactions.
+//     // Otherwise the etherscan api doesn't find the deployed contract.
+//     console.log('waiting for autopay tx confirmation...');
+//    // await autopay.deployTransaction.wait(7)
 
-    console.log('submitting query data storage contract for verification...');
-    try {
-        await run("verify:verify",
-            {
-                address: qstorage.address
-            },
-        )
-        console.log("query data storage contract verified")
-    } catch (e) {
-        console.log(e)
-    }
+//     console.log('submitting autopay contract for verification...');
+//     try {
+//         await run("verify:verify",
+//             {
+//                 address: autopay.address,
+//                 constructorArguments: [flex.address, qstorage.address, _autopayFee]
+//             },
+//         )
+//         console.log("autopay contract verified")
+//     } catch (e) {
+//         console.log(e)
+//     }
+
+
+//     // Wait for few confirmed transactions.
+//     // Otherwise the etherscan api doesn't find the deployed contract.
+//     console.log('waiting for query data storage tx confirmation...');
+//     //await qstorage.deployTransaction.wait(7)
+
+//     console.log('submitting query data storage contract for verification...');
+//     try {
+//         await run("verify:verify",
+//             {
+//                 address: qstorage.address
+//             },
+//         )
+//         console.log("query data storage contract verified")
+//     } catch (e) {
+//         console.log(e)
+//     }
 
 
 }
