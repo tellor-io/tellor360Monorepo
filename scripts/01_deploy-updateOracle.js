@@ -8,8 +8,11 @@ require("dotenv").config();
 const web3 = require('web3');
 const hre = require("hardhat"); 
 
-
-// npx hardhat run scripts/01_deploy-updateOracle.js --network linea_testnet
+function sleep_s(secs) {
+    secs = (+new Date) + secs * 1000;
+    while ((+new Date) < secs);
+  }
+// npx hardhat run scripts/01_deploy-updateOracle.js --network europa_testnet
 
 var reportingLock = 3600 * 12; // 12 hours
 var stakeAmountDollarTarget = web3.utils.toWei("375");
@@ -206,12 +209,29 @@ async function deployUpdateOracle( _reportingLock, _stakeAmountDollarTarget, _st
         } else if (net == "linea") {
                     var network = "linea"
                     var explorerUrl = "https://lineascan.build/address/"
-                    var _tokenAddress = ''
+                    var _tokenAddress = '0x35482B93941B439dEA2244Cc30A20D1Ed862DF86'
+                    var _teamMultisigAddress = '0x34Fae97547E990ef0E05e05286c51E4645bf1A85'
+                    var pubAddr = process.env.TESTNET_PUBLIC
+                    var privateKey = process.env.TESTNET_PK
+                    var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_LINEA)          
+                } else if (net == "europa_testnet") {
+                    var network = "europa_testnet"
+                    var explorerUrl = "https://juicy-low-small-testnet.explorer.testnet.skalenodes.com/address/"
+                    var _tokenAddress = '0x34Fae97547E990ef0E05e05286c51E4645bf1A85'
+                    var _teamMultisigAddress = '0x896419Ed2E0dC848a1f7d2814F4e5Df4b9B9bFcc'
+                    var pubAddr = process.env.TESTNET_PUBLIC
+                    var privateKey = process.env.TESTNET_PK
+                    var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_SKALE_EUROPA_TESTNET)          
+        } else if (net == "europa") {
+                    var network = "europa"
+                    var explorerUrl = "https://elated-tan-skat.explorer.mainnet.skalenodes.com/address/"
+                    var _tokenAddress = ' '
                     var _teamMultisigAddress = ''
                     var pubAddr = process.env.TESTNET_PUBLIC
                     var privateKey = process.env.TESTNET_PK
-                    var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_LINEAß)          
-                  
+                    var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_SKALE_EUROPA)          
+                
+
         } else {
            console.log( "network not defined")
         }
@@ -228,76 +248,63 @@ async function deployUpdateOracle( _reportingLock, _stakeAmountDollarTarget, _st
     let wallet = new ethers.Wallet(privateKey, provider)
     
 
-    //////////////// TellorFlex
+    ////////////// TellorFlex
     console.log("Starting deployment for flex contract...")
     const flexfac = await ethers.getContractFactory("tellorflex/contracts/TellorFlex.sol:TellorFlex", wallet)
-    const flex = await flexfac.deploy(_tokenAddress, _reportingLock, _stakeAmountDollarTarget, _stakingTokenPrice,_minTRBstakeAmount , _stakingTokenPriceQueryId, { gasPrice:10000000000 , gasLimit: 8000000   })
+    const flex = await flexfac.deploy(_tokenAddress, _reportingLock, _stakeAmountDollarTarget, _stakingTokenPrice,_minTRBstakeAmount , _stakingTokenPriceQueryId, { gasPrice:1000000000 , gasLimit: 8000000   })
           
     await flex.deployed()
     console.log("TellorFlex contract deployed to: ", flex.address)
     console.log(explorerUrl + flex.address)
     await flex.deployTransaction.wait(7)
-  //  sleep(5000)
-    
+    sleep_s(10)
+
+
 
     //////////////// Governance
     console.log("Starting deployment for governance contract...")
     const govfac = await ethers.getContractFactory("polygongovernance/contracts/Governance.sol:Governance", wallet)
-    const governance = await govfac.deploy(flex.address, _teamMultisigAddress, { gasPrice:10000000000 , gasLimit: 8000000   })
+    const governance = await govfac.deploy(flex.address, _teamMultisigAddress, { gasPrice:1000000000 , gasLimit: 8000000   })
     
     await governance.deployed()
     console.log("Governance contract deployed to: ", governance.address)
     console.log(explorerUrl + governance.address);
 
     await governance.deployTransaction.wait(7)
-  //  sleep(5000)
+    sleep_s(10)
 
-    // var TellorFlex = '0x9EA18BFDB50E9bb4A18F9d3Df7804E398F8fE0dc'
-    // var Governance = '0x89e44099f5E80484dcF48995080481214b9c2D7c'
-
-    //////////////// TellorFlex
-    
-//     const flex = await ethers.getContractAt("tellorflex/contracts/TellorFlex.sol:TellorFlex",TellorFlex, wallet )
-//    console.log("TellorFlex contract deployed to: ", flex.address)
-
-//     //////////////// Governance
-    
-//     const governance = await ethers.getContractAt("polygongovernance/contracts/Governance.sol:Governance", Governance, wallet)
-//     console.log("Governance contract deployed to: ", governance.address)
  
-//     QueryDataStorage = '0xe331afe3a8d7836bedf1f09bc91549f4bc8c60c9'
-//       ///////////// QueryDataStorage
-//       const qstorage = await ethers.getContractAt("autopay/contracts/QueryDataStorage.sol:QueryDataStorage", QueryDataStorage, wallet)
-//       console.log("QueryDataStorage contract deployed to: ", qstorage.address)
-
     ///////////// QueryDataStorage
     console.log("Starting deployment for QueryDataStorage contract...")
     const qstoragefac = await ethers.getContractFactory("autopay/contracts/QueryDataStorage.sol:QueryDataStorage", wallet)
-    const qstorage = await qstoragefac.deploy({ gasPrice:10000000000 , gasLimit: 2000000   })
+    const qstorage = await qstoragefac.deploy({ gasPrice:1000000000 , gasLimit: 1000000   })
     console.log("QueryDataStorage contract deployed to: ", qstorage.address)
 
     await qstorage.deployed();
     console.log(explorerUrl + qstorage.address);
     await qstorage.deployTransaction.wait(7)
-   // sleep(5000)
+    sleep_s(10)
+
 
     //////////////// Autopay
     console.log("Starting deployment for Autopay contract...")
     const autopayfac = await ethers.getContractFactory("autopay/contracts/Autopay.sol:Autopay", wallet)
-    const autopay = await autopayfac.deploy(flex.address, qstorage.address, _autopayFee, { gasPrice:10000000000 , gasLimit: 5000000   } ) // tellorOracleAddress, queryDataStorageAddress, autopayFee
+    const autopay = await autopayfac.deploy(flex.address, qstorage.address, _autopayFee, { gasPrice:1000000000 , gasLimit: 5000000   } ) // tellorOracleAddress, queryDataStorageAddress, autopayFee
     
 
     await autopay.deployed()
     console.log("Autopay contract deployed to: ", autopay.address)
     console.log(explorerUrl + autopay.address);
     await autopay.deployTransaction.wait(7)
-   // sleep(5000)
+    sleep_s(10)
+
 
     // init flex
     console.log('initializing flex...');
-    await flex.init(governance.address, { gasPrice:10000000000 , gasLimit: 2000000   } )
+    await flex.init(governance.address, { gasPrice:1000000000 , gasLimit: 2000000   } )
     console.log('flex initialized');
-  //  sleep(5000)
+    sleep_s(10)
+
     //////////////// Verify contracts
 
 

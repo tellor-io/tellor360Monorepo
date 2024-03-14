@@ -155,6 +155,18 @@ module.exports = {
       gas: 8000000 ,
       gasPrice: 1000000000
     },  
+    europa_testnet: {
+      url: `${process.env.NODE_URL_SKALE_EUROPA_TESTNET}`,
+      seeds: [process.env.TESTNET_PK],
+      gas: 8000000 ,
+      gasPrice: 10000000000
+    }, 
+    europa: {
+      url: `${process.env.NODE_URL_SKALE_EUROPA}`,
+      seeds: [process.env.TESTNET_PK],
+      gas: 8000000 ,
+      gasPrice: 10000000000
+    }  
 
   },
 
