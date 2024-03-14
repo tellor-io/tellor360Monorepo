@@ -6,7 +6,8 @@ require("hardhat-gas-reporter");
 require("hardhat-gas-reporter");
 require('hardhat-contract-sizer');
 require("@nomiclabs/hardhat-ethers");
-require("@nomiclabs/hardhat-etherscan");
+//require("@nomiclabs/hardhat-etherscan");
+//require("@nomicfoundation/hardhat-verify");
 require("dotenv").config();
 
 module.exports = {
@@ -26,7 +27,7 @@ module.exports = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 100
+            runs: 300
           }
         }
       },
@@ -35,7 +36,7 @@ module.exports = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200
+            runs: 300
           }
         }
       }
@@ -133,48 +134,89 @@ module.exports = {
       seeds: [process.env.TESTNET_PK],
       gas: 8000000 ,
       gasPrice: 1000000000
-    }
+    },
+    zkevm_testnet: {
+      url: `${process.env.NODE_URL_ZKEVM_TESTNET}`,
+      seeds: [process.env.TESTNET_PK]
+    },
+    zkevm: {
+      url: `${process.env.NODE_URL_ZKEVM_POLYGON}`,
+      seeds: [process.env.TESTNET_PK]
+    },
+    linea_testnet: {
+      url: `${process.env.NODE_URL_LINEA_TESTNET}`,
+      seeds: [process.env.TESTNET_PK],
+      gas: 8000000 ,
+      gasPrice: 1000000000
+    },
+    linea: {
+      url: `${process.env.NODE_URL_LINEA}`,
+      seeds: [process.env.TESTNET_PK],
+      gas: 8000000 ,
+      gasPrice: 1000000000
+    },  
+    europa_testnet: {
+      url: `${process.env.NODE_URL_SKALE_EUROPA_TESTNET}`,
+      seeds: [process.env.TESTNET_PK],
+      gas: 8000000 ,
+      gasPrice: 10000000000
+    }, 
+    europa: {
+      url: `${process.env.NODE_URL_SKALE_EUROPA}`,
+      seeds: [process.env.TESTNET_PK],
+      gas: 8000000 ,
+      gasPrice: 10000000000
+    }  
 
   },
+
   // etherscan: {
   //   // Your API key for Etherscan
   //   // Obtain one at https://etherscan.io/
   //   //apiKey: process.env.ETHERSCAN
-  //   //apiKey: process.env.POLYSCAN
-  //   apiKey: process.env.ETHERSCAN
+  //   apiKey: process.env.POLYSCAN
+  //   //apiKey: process.env.ETHERSCAN
+  // },
+  // sourcify: {
+  //   // Disabled by default
+  //   // Doesn't need an API key
+  //   enabled: true
   // },
 
-  etherscan: {
-    apiKey: {
-       // Your API key for Etherscan
-   // Obtain one at https://etherscan.io/
-   //sepolia: process.env.ETHERSCAN
-   //apiKey: process.env.POLYSCAN
-   //apiKey: process.env.BSC_TOKEN
-   //apiKey: process.env.OPTIMISMSCAN
-   mantleTest: process.env.ETHERSCAN
-    },
-    customChains: [
-      {
-        network: "sepolia",
-        chainId: 11155111,
-        urls: {
-          apiURL: "https://api-sepolia.etherscan.io/api",
-          browserURL: "https://sepolia.etherscan.io"
-        }
-      },
-      {
-        network: "mantleTest",
-        chainId: 5001,
-        urls: {
-        apiURL: "https://explorer.testnet.mantle.xyz/api",
-        browserURL: "https://explorer.testnet.mantle.xyz"
-        }
-      }
+
+  // etherscan: {
+  //   apiKey: {
+  //      // Your API key for Etherscan
+  //  // Obtain one at https://etherscan.io/
+  //  //sepolia: process.env.ETHERSCAN
+  //  //apiKey: process.env.POLYSCAN
+  //  //apiKey: process.env.BSC_TOKEN
+  //  //apiKey: process.env.OPTIMISMSCAN
+  //  //mantleTest: process.env.ETHERSCAN
+  //  polygonZKEVMTestnet: process.env.POLYSCAN
+  //   },
+
+    // customChains: [
+    //   {
+    //     network: "sepolia",
+    //     chainId: 11155111,
+    //     urls: {
+    //       apiURL: "https://api-sepolia.etherscan.io/api",
+    //       browserURL: "https://sepolia.etherscan.io"
+    //     }
+    //   },
+    //   {
+    //     network: "mantleTest",
+    //     chainId: 5001,
+    //     urls: {
+    //     apiURL: "https://explorer.testnet.mantle.xyz/api",
+    //     browserURL: "https://explorer.testnet.mantle.xyz"
+    //     }
+    //   }
+    //]
 
 
-    ]
-  },
+  //},
 
 
 
