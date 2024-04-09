@@ -166,22 +166,42 @@ module.exports = {
       seeds: [process.env.TESTNET_PK],
       gas: 8000000 ,
       gasPrice: 10000000000
-    }  
+    },
+    fraxtal_testnet: {
+      url: `${process.env.NODE_URL_FRAXTAL_TESTNET}`,
+      seeds: [process.env.TESTNET_PK],
+      gas: 8000000 ,
+      gasPrice: 10000000000
+    }, 
+    fraxtal: {
+      url: `${process.env.NODE_URL_FRAXTAL}`,
+      seeds: [process.env.TESTNET_PK],
+      gas: 8000000 ,
+      gasPrice: 10000000000
+    },
+    kyoto_testnet:      {
+      url: `${process.env.NODE_URL_KYOTO_TESTNET}`,
+      seeds: [process.env.TESTNET_PK],
+      gas: 8000000 ,
+      gasPrice: 10000000000
+    },
+      
+  
 
   },
 
-  // etherscan: {
-  //   // Your API key for Etherscan
-  //   // Obtain one at https://etherscan.io/
-  //   //apiKey: process.env.ETHERSCAN
-  //   apiKey: process.env.POLYSCAN
-  //   //apiKey: process.env.ETHERSCAN
-  // },
-  // sourcify: {
-  //   // Disabled by default
-  //   // Doesn't need an API key
-  //   enabled: true
-  // },
+  etherscan: {
+    // Your API key for Etherscan
+    // Obtain one at https://etherscan.io/
+    apiKey: process.env.ETHERSCAN
+    //apiKey: process.env.POLYSCAN
+    //apiKey: process.env.ETHERSCAN
+  },
+  sourcify: {
+    // Disabled by default
+    // Doesn't need an API key
+    enabled: true
+  },
 
 
   // etherscan: {
