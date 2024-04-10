@@ -50,7 +50,7 @@
   },
   "dependencies": {
     "autopay": "github:tellor-io/autoPay",
-    "governance": "github:tellor-io/governance",
+    "polygongovernance": "github:tellor-io/governance",
     "tellor360": "github:tellor-io/tellor360",
     "tellorflex": "github:tellor-io/tellorFlex",
     "usingtellor": "^5.0.0"

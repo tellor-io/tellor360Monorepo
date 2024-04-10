@@ -33,9 +33,18 @@ const config: HardhatUserConfig = {
       // https://era.zksync.io/docs/tools/hardhat/hardhat-zksync-solc.html#configuration
     },
   },
+
   solidity: {
-    version: "0.8.17",
-  },
+    compilers: [
+      {  version: "0.8.3"},
+      {  version: "0.8.17"},
+      {  version: "0.6.11"},
+      {  version: "0.4.24"},
+    ]
+  }
+
+
+
 };
 
 export default config;

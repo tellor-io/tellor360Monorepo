@@ -9,9 +9,9 @@ function sleep_s(secs) {
   while ((+new Date) < secs);
 }
 
-var explorerUrl = "https://testnet.kyotoscan.io/address/"
-var _tokenAddress = '0x896419Ed2E0dC848a1f7d2814F4e5Df4b9B9bFcc'
-var _teamMultisigAddress = '0x34Fae97547E990ef0E05e05286c51E4645bf1A85'
+var explorerUrl = "https://sepolia.explorer.zksync.io/address/"
+var _tokenAddress = '0x61e3BE234D7EE7b1e2a1fA84027105c733b91545'
+var _teamMultisigAddress = '0x5c84d7220d87E3De7FdBF9037bE8F48442F8e40A'//deployment wallet
 var _reportingLock = 3600 * 12; // 12 hours
 var _stakeAmountDollarTarget = web3.utils.toWei("150")
 var _stakingTokenPrice = web3.utils.toWei("85");
@@ -30,35 +30,35 @@ async function deploy () {
   //const tellorflex = "tellorflex/contracts/TellorFlex.sol:TellorFlex"
   const flex = await deployContract(tellorflex,[_tokenAddress, _reportingLock, _stakeAmountDollarTarget, _stakingTokenPrice,_minTRBstakeAmount , _stakingTokenPriceQueryId])
   const flexaddress = await flex.getAddress()
-  console.log("TellorFlex", "https://testnet.kyotoscan.io/address/", flexaddress)
+  console.log("TellorFlex", explorerUrl, flexaddress)
   sleep_s(10)
 
   const governance = "Governance"
   //"governance/contracts/Governance.sol:Governance"
   const gov = await deployContract(governance,[flexaddress, _teamMultisigAddress])
   const govaddress = await gov.getAddress()
-  console.log("Governance", "https://testnet.kyotoscan.io/address/", govaddress)
+  console.log("Governance", explorerUrl, govaddress)
   sleep_s(10)
 
   //autopay/contracts/QueryDataStorage.sol:QueryDataStorage
   const querydata = "QueryDataStorage"
   const qd = await deployContract(querydata,[])
   const qdaddress = await qd.getAddress()
-  console.log("QueryDataStorage", "https://testnet.kyotoscan.io/address/", qdaddress)
+  console.log("QueryDataStorage", explorerUrl, qdaddress)
   sleep_s(10)
 
   //autopay/contracts/Autopay.sol:Autopay
-  const autopay = "Autopay"
+  const autopay = "autopay/contracts/Autopay.sol:Autopay"
   const ap = await deployContract(autopay,[flexaddress, qdaddress, _autopayFee])
   const apaddress = await ap.getAddress()
-  console.log("AutoPay", "https://testnet.kyotoscan.io/address/", apaddress)
-  sleep_s(10)
+  console.log("AutoPay", explorerUrl, apaddress)
+  sleep_s(20)
 
     // init flex
     console.log('initializing flex...');
     await flex.init(govaddress)
     console.log('flex initialized');
-     sleep_s(10)
+   
 
 }
 
