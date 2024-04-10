@@ -26,24 +26,32 @@ async function deploy () {
 
   var  _stakingTokenPriceQueryId = '0x5c13cd9c97dbb98f2429c101a2a8150e6c7a0ddaff6124ee176a3a411067ded0'
 
-  const tellorflex = "TellorFlex";
+  const tellorflex = "TellorFlex"
+  //const tellorflex = "tellorflex/contracts/TellorFlex.sol:TellorFlex"
   const flex = await deployContract(tellorflex,[_tokenAddress, _reportingLock, _stakeAmountDollarTarget, _stakingTokenPrice,_minTRBstakeAmount , _stakingTokenPriceQueryId])
   const flexaddress = await flex.getAddress()
+  console.log("TellorFlex", "https://testnet.kyotoscan.io/address/", flexaddress)
   sleep_s(10)
 
   const governance = "Governance"
+  //"governance/contracts/Governance.sol:Governance"
   const gov = await deployContract(governance,[flexaddress, _teamMultisigAddress])
   const govaddress = await gov.getAddress()
+  console.log("Governance", "https://testnet.kyotoscan.io/address/", govaddress)
   sleep_s(10)
 
-  const querydata = "QueryData"
+  //autopay/contracts/QueryDataStorage.sol:QueryDataStorage
+  const querydata = "QueryDataStorage"
   const qd = await deployContract(querydata,[])
   const qdaddress = await qd.getAddress()
+  console.log("QueryDataStorage", "https://testnet.kyotoscan.io/address/", qdaddress)
   sleep_s(10)
 
-  const autopay = "Governance"
+  //autopay/contracts/Autopay.sol:Autopay
+  const autopay = "Autopay"
   const ap = await deployContract(autopay,[flexaddress, qdaddress, _autopayFee])
   const apaddress = await ap.getAddress()
+  console.log("AutoPay", "https://testnet.kyotoscan.io/address/", apaddress)
   sleep_s(10)
 
     // init flex
