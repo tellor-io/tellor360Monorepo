@@ -1,8 +1,8 @@
 node_modules 
 package-lock.json
 
-cache-zk/
-artifacts-zk/
+cache-zk
+artifacts-zk
 cache
 artifacts
 # Config values
