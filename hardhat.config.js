@@ -185,6 +185,12 @@ module.exports = {
       gas: 8000000 ,
       gasPrice: 10000000000
     },
+    polygon_amoy: {
+      url: `${process.env.NODE_URL_POLYGON_AMOY}`,
+      seeds: [process.env.TESTNET_PK],
+      gas: 8000000 ,
+      gasPrice: 10000000000
+    }       
       
   
 

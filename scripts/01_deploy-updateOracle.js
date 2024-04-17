@@ -12,11 +12,11 @@ function sleep_s(secs) {
     secs = (+new Date) + secs * 1000;
     while ((+new Date) < secs);
   }
-// npx hardhat run scripts/01_deploy-updateOracle.js --network kyoto_testnet
+// npx hardhat run scripts/01_deploy-updateOracle.js --network polygon_amoy
 
 var reportingLock = 3600 * 12; // 12 hours
 var stakeAmountDollarTarget = web3.utils.toWei("150");
-var stakingTokenPrice = web3.utils.toWei("85");
+var stakingTokenPrice = web3.utils.toWei("50");
 var minTRBstakeAmount = web3.utils.toWei("10")
 var autopayFee = 20 // '20' is 2%
 
@@ -255,7 +255,15 @@ async function deployUpdateOracle( _reportingLock, _stakeAmountDollarTarget, _st
                     var pubAddr = process.env.TESTNET_PUBLIC
                     var privateKey = process.env.TESTNET_PK
                     var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_KYOTO_TESTNET)          
-                              
+        } else if (net == "polygon_amoy") {
+                    var network = "polygon_amoy"
+                    var explorerUrl = "https://amoy.polygonscan.com/address/"
+                    var _tokenAddress = '0xC866DB9021fe81856fF6c5B3E3514BF9D1593D81'
+                    var _teamMultisigAddress = '0x896419Ed2E0dC848a1f7d2814F4e5Df4b9B9bFcc'
+                    var pubAddr = process.env.TESTNET_PUBLIC
+                    var privateKey = process.env.TESTNET_PK
+                    var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_POLYGON_AMOY)          
+                          
 
         } else {
            console.log( "network not defined")
@@ -333,8 +341,8 @@ async function deployUpdateOracle( _reportingLock, _stakeAmountDollarTarget, _st
     //////////////// Verify contracts
 
 
-    Wait for few confirmed transactions.
-    Otherwise the etherscan api doesn't find the deployed contract.
+    //Wait for few confirmed transactions.
+    //Otherwise the etherscan api doesn't find the deployed contract.
 
 
     console.log('waiting for governance tx confirmation...');
