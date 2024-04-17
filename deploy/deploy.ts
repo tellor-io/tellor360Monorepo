@@ -1,7 +1,7 @@
 import { deployContract } from "./utils";
 const web3 = require('web3');
 
-//npx hardhat run deploy/deploy.ts --network zkSyncSepoliaTestnet
+//npx hardhat run deploy/deploy.ts --network zkSyncMainnet
 
 
 function sleep_s(secs) {
@@ -9,12 +9,12 @@ function sleep_s(secs) {
   while ((+new Date) < secs);
 }
 
-var explorerUrl = "https://sepolia.explorer.zksync.io/address/"
-var _tokenAddress = '0x61e3BE234D7EE7b1e2a1fA84027105c733b91545'
-var _teamMultisigAddress = '0x5c84d7220d87E3De7FdBF9037bE8F48442F8e40A'//deployment wallet
+var explorerUrl = "https://explorer.zksync.io/address/"
+var _tokenAddress = '0xf9966320bf9c2d38297036f3c4efc9dae929ed37'
+var _teamMultisigAddress = '0x344E364B381e6C3Cceaa9f1cA5fF53c939ffa2c1'
 var _reportingLock = 3600 * 12; // 12 hours
 var _stakeAmountDollarTarget = web3.utils.toWei("150")
-var _stakingTokenPrice = web3.utils.toWei("85");
+var _stakingTokenPrice = web3.utils.toWei("53");
 var _minTRBstakeAmount = web3.utils.toWei("10")
 var _autopayFee = 20 // '20' is 2%
 
