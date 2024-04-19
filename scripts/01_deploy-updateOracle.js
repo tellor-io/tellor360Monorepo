@@ -12,7 +12,8 @@ function sleep_s(secs) {
     secs = (+new Date) + secs * 1000;
     while ((+new Date) < secs);
   }
-// npx hardhat run scripts/01_deploy-updateOracle.js --network polygon_amoy
+// npx hardhat run scripts/01_deploy-updateOracle.js --network optimism_sepolia
+
 
 var reportingLock = 3600 * 12; // 12 hours
 var stakeAmountDollarTarget = web3.utils.toWei("150");
@@ -263,8 +264,14 @@ async function deployUpdateOracle( _reportingLock, _stakeAmountDollarTarget, _st
                     var pubAddr = process.env.TESTNET_PUBLIC
                     var privateKey = process.env.TESTNET_PK
                     var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_POLYGON_AMOY)          
-                          
-
+        } else if (net == "optimism_sepolia") {
+                    var network = "optimism_sepolia"
+                    var explorerUrl = "https://sepolia-optimism.etherscan.io/address"
+                    var _tokenAddress = "0x896419Ed2E0dC848a1f7d2814F4e5Df4b9B9bFcc"
+                    var _teamMultisigAddress = "0x34Fae97547E990ef0E05e05286c51E4645bf1A85"
+                    var pubAddr = process.env.TESTNET_PUBLIC
+                    var privateKey = process.env.TESTNET_PK
+                    var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_OPTIMISM_SEPOLIA)          
         } else {
            console.log( "network not defined")
         }
@@ -272,6 +279,7 @@ async function deployUpdateOracle( _reportingLock, _stakeAmountDollarTarget, _st
         console.log("Tellor Address: ", _tokenAddress)
         console.log("nework", network)
         console.log("deploying from: ", pubAddr)
+        
         
     } catch (error) {
         console.error(error)
@@ -303,8 +311,8 @@ async function deployUpdateOracle( _reportingLock, _stakeAmountDollarTarget, _st
     console.log("Governance contract deployed to: ", governance.address)
     console.log(explorerUrl + governance.address);
 
-    await governance.deployTransaction.wait(7)
-    sleep_s(10)
+    await governance.deployTransaction.wait(10)
+    sleep_s(20)
 
  
     ///////////// QueryDataStorage
@@ -315,8 +323,8 @@ async function deployUpdateOracle( _reportingLock, _stakeAmountDollarTarget, _st
 
     await qstorage.deployed();
     console.log(explorerUrl + qstorage.address);
-    await qstorage.deployTransaction.wait(7)
-    sleep_s(10)
+    await qstorage.deployTransaction.wait(10)
+    sleep_s(20)
 
 
     //////////////// Autopay
@@ -328,8 +336,8 @@ async function deployUpdateOracle( _reportingLock, _stakeAmountDollarTarget, _st
     await autopay.deployed()
     console.log("Autopay contract deployed to: ", autopay.address)
     console.log(explorerUrl + autopay.address);
-    await autopay.deployTransaction.wait(7)
-    sleep_s(10)
+    await autopay.deployTransaction.wait(10)
+    sleep_s(20)
 
        
     // init flex
