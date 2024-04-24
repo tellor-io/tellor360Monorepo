@@ -12,7 +12,7 @@ function sleep_s(secs) {
     secs = (+new Date) + secs * 1000;
     while ((+new Date) < secs);
   }
-// npx hardhat run scripts/01_deploy-updateOracle.js --network optimism_sepolia
+// npx hardhat run scripts/01_deploy-updateOracle.js --network base_sepolia
 
 
 var reportingLock = 3600 * 12; // 12 hours
@@ -266,13 +266,40 @@ async function deployUpdateOracle( _reportingLock, _stakeAmountDollarTarget, _st
                     var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_POLYGON_AMOY)          
         } else if (net == "optimism_sepolia") {
                     var network = "optimism_sepolia"
-                    var explorerUrl = "https://sepolia-optimism.etherscan.io/address"
+                    var explorerUrl = "https://sepolia-optimism.etherscan.io/address/"
                     var _tokenAddress = "0x896419Ed2E0dC848a1f7d2814F4e5Df4b9B9bFcc"
                     var _teamMultisigAddress = "0x34Fae97547E990ef0E05e05286c51E4645bf1A85"
                     var pubAddr = process.env.TESTNET_PUBLIC
                     var privateKey = process.env.TESTNET_PK
                     var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_OPTIMISM_SEPOLIA)          
-        } else {
+        } else if (net == "arbitrum_sepolia") {
+                    var network = "arbitrum_sepolia"
+                    var explorerUrl = "https://sepolia.arbiscan.io/address/"
+                    var _tokenAddress = "0xC866DB9021fe81856fF6c5B3E3514BF9D1593D81"
+                    var _teamMultisigAddress = "0x896419Ed2E0dC848a1f7d2814F4e5Df4b9B9bFcc"
+                    var pubAddr = process.env.TESTNET_PUBLIC
+                    var privateKey = process.env.TESTNET_PK
+                    var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_ARBITRUM_SEPOLIA)
+        } else if (net == "mantle_sepolia") {
+                    var network = "mantle_sepolia"
+                    var explorerUrl = "https://explorer.sepolia.mantle.xyz/address/"
+                    var _tokenAddress = "0x896419Ed2E0dC848a1f7d2814F4e5Df4b9B9bFcc"
+                    var _teamMultisigAddress = "0x34Fae97547E990ef0E05e05286c51E4645bf1A85"
+                    var pubAddr = process.env.TESTNET_PUBLIC
+                    var privateKey = process.env.TESTNET_PK
+                    var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_MANTLE_SEPOLIA)          
+        } else if (net == "base_sepolia") {
+                    var network = "base_sepolia"
+                    var explorerUrl = "https://sepolia.basescan.org/address/"
+                    var _tokenAddress = "0x896419Ed2E0dC848a1f7d2814F4e5Df4b9B9bFcc"
+                    var _teamMultisigAddress = "0x28Adc1f33796de0F9e4cffeb28eF23aB17B02323"
+                    var pubAddr = process.env.TESTNET_PUBLIC
+                    var privateKey = process.env.TESTNET_PK
+                    var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_BASE_SEPOLIA)          
+                      
+        
+        
+                } else {
            console.log( "network not defined")
         }
  

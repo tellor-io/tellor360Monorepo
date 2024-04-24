@@ -9,19 +9,13 @@ const hre = require("hardhat");
 
 // npx hardhat run scripts/runInit.js --network tfilecoin
 
-var reportingLock = 3600 * 12; // 12 hours
-var stakeAmountDollarTarget = web3.utils.toWei("2000");
-var stakingTokenPrice = web3.utils.toWei("15");
-var minTRBstakeAmount = web3.utils.toWei("200")
-var autopayFee = 20 // '20' is 2%
 
-
-async function deployTellor360( _reportingLock, _stakeAmountDollarTarget, _stakingTokenPrice,_minTRBstakeAmount , _autopayFee) {
+async function deployTellor360() {
     console.log("deploy tellor 360")
     await run("compile")
 
     var net = hre.network.name
-    var  _stakingTokenPriceQueryId = '0x5c13cd9c97dbb98f2429c101a2a8150e6c7a0ddaff6124ee176a3a411067ded0'
+
     ///////////////Connect to the network
     try {
         if (net == "mainnet") {
@@ -75,19 +69,10 @@ async function deployTellor360( _reportingLock, _stakeAmountDollarTarget, _staki
             var privateKey = process.env.TESTNET_PK
             var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_GNOSIS)
 
-        } else if (net == "optimism_goerli") {
-            var network = "optimism_goerli"
-            var explorerUrl = "https://gnosisscan.io/address/"
-            var _tokenAddress = ''
-            var _teamMultisigAddress = ''
-            var pubAddr = process.env.TESTNET_PUBLIC
-            var privateKey = process.env.TESTNET_PK
-            var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_GNOSIS)
         } else if (net == "arbitrum_testnet") {
             var network = "arbitrum_testnet"
             var explorerUrl = "https://goerli.arbiscan.io/address/"
             var _tokenAddress = '0x8d1bB5eDdFce08B92dD47c9871d1805211C3Eb3C'
-            var _teamMultisigAddress = '0xd71F72C18767083e4e3FE84F9c62b8038C1Ef4f6'
             var pubAddr = process.env.TESTNET_PUBLIC
             var privateKey = process.env.TESTNET_PK
             var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_ARBITRUM_TESTNET)
@@ -96,7 +81,6 @@ async function deployTellor360( _reportingLock, _stakeAmountDollarTarget, _staki
             var network = "tfilecoin"
             var explorerUrl = "https://hyperspace.filfox.info/en/address/"
             var _tokenAddress = '0xe7147C5Ed14F545B4B17251992D1DB2bdfa26B6d'
-            var _teamMultisigAddress = '0x15e6Cc0D69A162151Cadfba035aa10b82b12b970'
             var pubAddr = process.env.TESTNET_PUBLIC
             var privateKey = process.env.TESTNET_PK
             var provider = new ethers.providers.JsonRpcProvider(process.env.NODE_URL_FILECOIN_TESTNET)
@@ -114,9 +98,7 @@ async function deployTellor360( _reportingLock, _stakeAmountDollarTarget, _staki
         process.exit(1)
     }
     let wallet = new ethers.Wallet(privateKey, provider)
-    let tellorFlexAddress = "0xb2CB696fE5244fB9004877e58dcB680cB86Ba444"
-    
-    let governanceAddress = "0xb55bB55f7D8b4F26Bd18198088C96488D95cab39"
+
 
    //const flexfac = await ethers.getContractFactory("tellorflex/contracts/TellorFlex.sol:TellorFlex", wallet)
     let flex = await ethers.getContractAt("tellorflex/contracts/TellorFlex.sol:TellorFlex", tellorFlexAddress, wallet)
@@ -128,7 +110,7 @@ async function deployTellor360( _reportingLock, _stakeAmountDollarTarget, _staki
 }
 
 
-deployTellor360(  reportingLock, stakeAmountDollarTarget, stakingTokenPrice, minTRBstakeAmount, autopayFee)
+deployTellor360()
     .then(() => process.exit(0))
     .catch(error => {
         console.error(error);
